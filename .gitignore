@@ -1,0 +1,13 @@
+# Build artifacts
+build/
+devel/
+install/
+
+# Executables
+bin/
+lib/
+
+# Log files
+log/
+
+# Other project-specific files
