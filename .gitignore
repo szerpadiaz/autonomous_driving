@@ -11,6 +11,7 @@ bin/
 lib/
 
 # Log files
-log/
+logs/
 
 # Other project-specific files
+.catkin_tools/
