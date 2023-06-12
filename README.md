@@ -23,3 +23,6 @@ image_proc.
 - Please ping us in case you have any questions or if you get stuck in some subtasks.
 - Use a global map as your voxel grid representation. Use a smart resolution for your voxel grid representation (e.g. 1m).
 
+
+
+# Useful links and sources
