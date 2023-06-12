@@ -17,23 +17,27 @@ curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo ap
 sudo apt install ros-noetic-desktop-full
 sudo apt install python3-catkin-tools
 ```
+- Update the .bashrc file to source the ros setup file
+```
+echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
+```
 
 ## Getting Started
-1. Clone the repository
-2. Build project
+- Open a new terminal
+- Clone the repository
+- Build project
 ```
 cd autonomous_driving
 catkin build
 ```
-3. Download the Unity Environment: https://syncandshare.lrz.de/getlink/fiEg9ocZ6Pc5iuEa4QqN1b/
-4. Unzip the Unity file and copy the files to .../devel/lib/simulation/
-5. Run a test:
-  - Manually control the car with w-a-s-d:
+- Download the Unity Environment: https://syncandshare.lrz.de/getlink/fiEg9ocZ6Pc5iuEa4QqN1b/
+- Unzip the Unity file and copy the files to .../devel/lib/simulation/
+- Run simulation to manually control the car with w-a-s-d:
 ```
 chmod +x ./devel/lib/simulation/Car_build.x86_64
 roslaunch simulation simulation.launch
 ```
-  - Run controller_node (i.e. The car will start driving and bump into the wall on the right) 
+- Run controller_node (i.e. The car will start driving and bump into the wall on the right) 
 ```
 rosrun controller_pkg controller_node
 ```
