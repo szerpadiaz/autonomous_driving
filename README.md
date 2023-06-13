@@ -1,17 +1,54 @@
+## System requirements
+- Ubuntu 20.04.6 LTS (64-bit)
+
+## Tools installation
+- Install basic Tools
+```
+sudo apt install build-essential
+sudo apt install git
+sudo apt-get install terminator
+```
+- Install ROS (see also http://wiki.ros.org/Installation/Ubuntu)
+```
+sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+sudo apt install curl
+sudo apt update
+curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+sudo apt install ros-noetic-desktop-full
+sudo apt install python3-catkin-tools
+```
+- Update the .bashrc file to source the ros setup file
+```
+echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
+```
+
 ## Getting Started
+- Open a new terminal
+- Clone the repository
+- Build project
+```
+cd autonomous_driving
+catkin build
+```
+- Download the Unity Environment: https://syncandshare.lrz.de/getlink/fiEg9ocZ6Pc5iuEa4QqN1b/
+- Unzip the Unity file and copy the files to .../devel/lib/simulation/
+- Run simulation to manually control the car with w-a-s-d:
+```
+chmod +x ./devel/lib/simulation/Car_build.x86_64
+roslaunch simulation simulation.launch
+```
+- Run controller_node (i.e. The car will start driving and bump into the wall on the right) 
+```
+rosrun controller_pkg controller_node
+```
 
-
-1. Copy the src-folder to your repository and build it
-2. Download the Unity Environment: https://syncandshare.lrz.de/getlink/fiEg9ocZ6Pc5iuEa4QqN1b/
-3. Unzip the Unity file and copy the files to .../devel/lib/simulation/
-4. Run a test:
-  a.) roslaunch simulation simulation.launch
-  b.) rosrun controller_node
-  
-The car will start driving and bump into the wall on the right. 
-For testings you can as well manually control the car with w-a-s-d from Unity.
-
-
+## Code editor 
+- Install vs-Code
+```
+sudo apt install code
+```
+- Open 'autonomous_driving' folder in vs-code
+- In vs-code go to the Extensions sidebar (Ctrl+Shift+X). Search for "ROS" in the search bar and choose the "ROS" extension developed by Microsoft.
 
 # Tips
 
@@ -23,3 +60,6 @@ image_proc.
 - Please ping us in case you have any questions or if you get stuck in some subtasks.
 - Use a global map as your voxel grid representation. Use a smart resolution for your voxel grid representation (e.g. 1m).
 
+
+
+# Useful links and sources
