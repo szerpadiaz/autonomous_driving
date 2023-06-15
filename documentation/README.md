@@ -25,5 +25,7 @@ The basic idea of both the Trajectory Rollout and Dynamic Window Approach (DWA) 
 # Useful links and sources
 
 http://wiki.ros.org/move_base
+
 http://wiki.ros.org/base_local_planner#Overview
+
 https://www.youtube.com/watch?v=B-7-xK-_rYw
