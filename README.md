@@ -50,16 +50,4 @@ sudo apt install code
 - Open 'autonomous_driving' folder in vs-code
 - In vs-code go to the Extensions sidebar (Ctrl+Shift+X). Search for "ROS" in the search bar and choose the "ROS" extension developed by Microsoft.
 
-# Tips
-
-Here are a couple of hints regarding the implementation. The hints are just suggestions; you are free so solve the task differently:
-- The controller in controller_pkg courrently sends fixed values to the car. Start working here.
-- Generating point cloud from depth image: use depth_image_proc in http://wiki.ros.org/depth_
-image_proc.
-- Generating occupancy Grid: use Octomap in http://wiki.ros.org/octomap.
-- Please ping us in case you have any questions or if you get stuck in some subtasks.
-- Use a global map as your voxel grid representation. Use a smart resolution for your voxel grid representation (e.g. 1m).
-
-
-
 # Useful links and sources
