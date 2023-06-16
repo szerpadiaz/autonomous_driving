@@ -19,8 +19,8 @@ class global_mapping_node{
 public:
     global_mapping_node() : octree(1) {
         point_cloud_sub = nh.subscribe("points_cloud", 1000, &global_mapping_node::point_cloud_cb, this);
-        octomap_pub = nh.advertise<octomap_msgs::Octomap>("octomap", 1000);
-        octomap_2D_pub = nh.advertise<octomap_msgs::Octomap>("octomap2D", 1000);
+        octomap_pub = nh.advertise<octomap_msgs::Octomap>("octomap", 10);
+        octomap_2D_pub = nh.advertise<octomap_msgs::Octomap>("octomap2D", 10);
     }
 
     void point_cloud_cb(const sensor_msgs::PointCloud2::ConstPtr& msg){
