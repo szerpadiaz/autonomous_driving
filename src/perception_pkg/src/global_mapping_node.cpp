@@ -130,7 +130,6 @@ public:
         map_msg.header.frame_id = "world";
         octomap_pub.publish(map_msg);
 
-        /*
         auto occupancy_grid = convert_3d_map_into_2d_occupancy_grid();
         nav_msgs::OccupancyGrid occupancy_grid_msg;
         occupancy_grid_msg.header.frame_id = "world";
@@ -144,7 +143,6 @@ public:
         occupancy_grid_msg.info.origin.orientation.w = 1;
         occupancy_grid_msg.data = occupancy_grid;
         occupancy_grid_pub.publish(occupancy_grid_msg);
-        */
     }
 };
 
