@@ -34,6 +34,10 @@ class global_mapping_node{
     float occupancy_clamping_max = 0.9;
     float abs_min_x = -60;
     float abs_min_y = -60;
+    uint32_t grid_width = 600;
+    uint32_t grid_height = 600;
+    float grid_origin_x = -150;
+    float grid_origin_y = -100;
 
 public:
     global_mapping_node() : octree(1) {
@@ -62,10 +66,8 @@ public:
         return success;
     }
 
-    void update_global_3d_map(const sensor_msgs::PointCloud2::ConstPtr& msg){
-        // Convert msg into a point-cloud-object
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-        pcl::fromROSMsg(*msg, *cloud);
+    void update_global_3d_map(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
+
         for(const auto& point : cloud->points){
             if (std::isfinite(point.x) && std::isfinite(point.y) && std::isfinite(point.z)) {
 
@@ -87,13 +89,6 @@ public:
     }
     
     nav_msgs::OccupancyGrid convert_3d_map_into_2d_occupancy_grid(){
-    
-        uint32_t grid_width = 600;
-        uint32_t grid_height = 600;
-        float grid_origin_x = -150;
-        float grid_origin_y = -100;
-
-        // Convert OctoMap to OccupancyGrid
         nav_msgs::OccupancyGrid occupancy_grid_msg;
         occupancy_grid_msg.header.frame_id = "world";
         occupancy_grid_msg.header.stamp = ros::Time::now();
@@ -133,18 +128,20 @@ public:
             return;
         }
 
-        update_global_3d_map(msg);
+        // Convert msg into a point-cloud-object
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+        pcl::fromROSMsg(*msg, *cloud);
+
+        update_global_3d_map(cloud);
 
         octomap_msgs::Octomap map_msg;
         octomap_msgs::fullMapToMsg(octree, map_msg);
         map_msg.header.frame_id = "world";
         octomap_pub.publish(map_msg);
 
+        //auto occupancy_grid_msg = convert_3d_map_into_2d_occupancy_grid();
 
-        auto occupancy_grid_msg = convert_3d_map_into_2d_occupancy_grid();
-
-        occupancy_grid_pub.publish(occupancy_grid_msg);
-
+        //occupancy_grid_pub.publish(occupancy_grid_msg);
     }
 };
 
