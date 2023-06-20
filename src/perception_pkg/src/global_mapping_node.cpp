@@ -88,19 +88,9 @@ public:
         }
     }
     
-    nav_msgs::OccupancyGrid convert_3d_map_into_2d_occupancy_grid(){
-        nav_msgs::OccupancyGrid occupancy_grid_msg;
-        occupancy_grid_msg.header.frame_id = "world";
-        occupancy_grid_msg.header.stamp = ros::Time::now();
-        occupancy_grid_msg.info.resolution = resolution;
-        occupancy_grid_msg.info.width = grid_width;
-        occupancy_grid_msg.info.height = grid_height;
-        occupancy_grid_msg.info.origin.position.x = grid_origin_x;
-        occupancy_grid_msg.info.origin.position.y = grid_origin_y;
-        occupancy_grid_msg.info.origin.position.z = 0;
-        occupancy_grid_msg.info.origin.orientation.w = 1;
+    std::vector<int8_t> convert_3d_map_into_2d_occupancy_grid(){
 
-        occupancy_grid_msg.data = std::vector<int8_t>(grid_width * grid_height, 0);
+        auto occupancy_grid = std::vector<int8_t>(grid_width * grid_height, 0);
 
         for (auto it = octree.begin_leafs(); it != octree.end_leafs(); ++it) {
             if (octree.isNodeOccupied(*it)) {
@@ -111,14 +101,14 @@ public:
                 unsigned int index = grid_x * grid_width + grid_y;
 
                 if (grid_x >= 0 && grid_x < grid_width && grid_y >= 0 && grid_y < grid_height) {
-                    occupancy_grid_msg.data[index] = 100;
+                    occupancy_grid[index] = 100;
                 }
                 
                 ROS_INFO("grid_x = %d and grid_y = %d (x = %f and y =%f) ", grid_x, grid_y, octo_node_center.x(), octo_node_center.y());
             }
         }
 
-        return occupancy_grid_msg;
+        return occupancy_grid;
     }
 
     void point_cloud_cb(const sensor_msgs::PointCloud2::ConstPtr& msg){
@@ -134,14 +124,27 @@ public:
 
         update_global_3d_map(cloud);
 
+        // send msg
         octomap_msgs::Octomap map_msg;
         octomap_msgs::fullMapToMsg(octree, map_msg);
         map_msg.header.frame_id = "world";
         octomap_pub.publish(map_msg);
 
-        //auto occupancy_grid_msg = convert_3d_map_into_2d_occupancy_grid();
-
-        //occupancy_grid_pub.publish(occupancy_grid_msg);
+        /*
+        auto occupancy_grid = convert_3d_map_into_2d_occupancy_grid();
+        nav_msgs::OccupancyGrid occupancy_grid_msg;
+        occupancy_grid_msg.header.frame_id = "world";
+        occupancy_grid_msg.header.stamp = ros::Time::now();
+        occupancy_grid_msg.info.resolution = resolution;
+        occupancy_grid_msg.info.width = grid_width;
+        occupancy_grid_msg.info.height = grid_height;
+        occupancy_grid_msg.info.origin.position.x = grid_origin_x;
+        occupancy_grid_msg.info.origin.position.y = grid_origin_y;
+        occupancy_grid_msg.info.origin.position.z = 0;
+        occupancy_grid_msg.info.origin.orientation.w = 1;
+        occupancy_grid_msg.data = occupancy_grid;
+        occupancy_grid_pub.publish(occupancy_grid_msg);
+        */
     }
 };
 
