@@ -15,6 +15,7 @@
 
 class global_mapping_node{
     ros::NodeHandle nh;
+    tf::StampedTransform  world_transform;
     ros::Subscriber point_cloud_sub;
     ros::Publisher octomap_pub;
     ros::Publisher occupancy_grid_pub;
@@ -48,22 +49,29 @@ public:
 
     }
 
-    void point_cloud_cb(const sensor_msgs::PointCloud2::ConstPtr& msg){
-        
-        // Convert msg into a point-cloud-object
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-        pcl::fromROSMsg(*msg, *cloud);
-
+    bool update_world_transform(){
+        bool success = false;
         tf::TransformListener tf_listener;
-        tf::StampedTransform  world_transform;
         try {
             tf_listener.waitForTransform("world", "camera", ros::Time(0), ros::Duration(3.0));
             tf_listener.lookupTransform("world", "camera", ros::Time(0), world_transform);
+            success = true;
         } catch (tf::TransformException& ex) {
             ROS_ERROR("Failed to lookup world-frame transform: %s", ex.what());
+        }
+        return success;
+    }
+
+    void point_cloud_cb(const sensor_msgs::PointCloud2::ConstPtr& msg){
+        
+        if (!update_world_transform())
+        { 
             return;
         }
 
+        // Convert msg into a point-cloud-object
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+        pcl::fromROSMsg(*msg, *cloud);
         for(const auto& point : cloud->points){
             if (std::isfinite(point.x) && std::isfinite(point.y) && std::isfinite(point.z)) {
 
