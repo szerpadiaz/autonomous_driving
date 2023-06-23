@@ -6,9 +6,11 @@ sudo apt-get install ros-noetic-octomap
 sudo apt-get install ros-noetic-octovis
 sudo apt-get install ros-noetic-octomap-msgs
 sudo apt-get install ros-noetic-octomap-rviz-*
+sudo apt-get install ros-noetic-octomap-mapping
 
 sudo apt-get install ros-noetic-pcl-ros
 sudo apt-get install ros-noetic-pcl-conversions
+
 ```
 * Launch simulation and perception
 ```

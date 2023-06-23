@@ -40,15 +40,18 @@
 
   <node name="w_to_unity" pkg="simulation" type="w_to_unity"/>
 
-
-
-  <node pkg="tf2_ros" type="static_transform_publisher"
-        name="sim_true_body"      args="0 0 0 0 0 0 /OurCar/Sensors/TrueState /true_body" />
-
+ <!-- <node pkg="tf2_ros" type="static_transform_publisher"
+        name="sim_true_body"      args="0 0 0 0 0 0 /OurCar/Sensors/TrueState /true_body" /> -->
+        
+<!--   <node pkg="tf2_ros" type="static_transform_publisher"
+        name="sim_true_body"      args="0 0 0 0 0 0 /OurCar/Sensors/TrueState /true_body" /> -->
   <node pkg="tf2_ros" type="static_transform_publisher"
         name="sim_rgb_camera"      args="0 0 0 0 0 0 /camera /OurCar/Sensors/RGBCameraLeft " />
 
-  <node pkg="tf2_ros" type="static_transform_publisher"
+<!--  <node pkg="tf2_ros" type="static_transform_publisher"
+        name="sim_depth_camera"      args="0 0 0 -1.578 0 -1.578 /depth_camera /OurCar/Sensors/DepthCamera" /> -->
+      
+      <node pkg="tf2_ros" type="static_transform_publisher"
         name="sim_depth_camera"      args="0 0 0 0 0 0 /depth_camera /OurCar/Sensors/DepthCamera" />
 
   <node pkg="tf2_ros" type="static_transform_publisher"
@@ -60,7 +63,7 @@
   <node pkg="tf2_ros" type="static_transform_publisher"
         name="depth_camera_to_body"      args="0 0 0 0 0 0 /true_body /depth_camera" />
 
-  <node pkg="tf2_ros" type="static_transform_publisher"
-        name="depth_camera_frame_to_body"      args="0 0 0 0 0 0 /true_body /OurCar/Sensors/DepthCamera" />
+<!--  <node pkg="tf2_ros" type="static_transform_publisher"
+        name="depth_camera_to_map" args="0 0 0 0 0 1.578 /OurCar/Sensors/DepthCamera map_frame" /> -->
 
 </launch>

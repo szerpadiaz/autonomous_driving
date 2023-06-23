@@ -19,6 +19,9 @@ class global_mapping_node{
     ros::Subscriber point_cloud_sub;
     ros::Publisher octomap_pub;
     ros::Publisher occupancy_grid_pub;
+    ros::Publisher transformed_point_cloud_pub;
+    ros::Subscriber octomap_full_sub;
+
     octomap::OcTree octree;
     float rel_min_x = -5;
     float rel_max_x = 5;
@@ -41,16 +44,18 @@ class global_mapping_node{
 
 public:
     global_mapping_node() : octree(1) {
-        point_cloud_sub = nh.subscribe("points_cloud", 10, &global_mapping_node::point_cloud_cb, this);
-        octomap_pub = nh.advertise<octomap_msgs::Octomap>("octomap", 10);
-        occupancy_grid_pub = nh.advertise<nav_msgs::OccupancyGrid>("occupancy_grid_map", 10);
+        transformed_point_cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("transformed_cloud", 1);
+        //point_cloud_sub = nh.subscribe("points_cloud", 1, &global_mapping_node::transform_point_cloud_cb, this);
+        octomap_pub = nh.advertise<octomap_msgs::Octomap>("octomap", 1);
+        occupancy_grid_pub = nh.advertise<nav_msgs::OccupancyGrid>("occupancy_grid_map", 1);
+
+        octomap_full_sub = nh.subscribe("octomap_full", 1, &global_mapping_node::transform_3d_into_2d_map, this);
         octomap::OcTree octree(resolution);
         octree.setOccupancyThres(occupancy_threshold);
         octree.setProbHit(occupancy_probability_hit);
         octree.setProbMiss(occupancy_probability_miss);
         octree.setClampingThresMin(occupancy_clamping_min);
         octree.setClampingThresMax(occupancy_clamping_max);
-
     }
 
     bool update_world_transform(){
@@ -64,6 +69,44 @@ public:
             ROS_ERROR("Failed to lookup world-frame transform: %s", ex.what());
         }
         return success;
+    }
+
+    void transform_3d_into_2d_map(const octomap_msgs::Octomap::ConstPtr& msg){
+        // Convert the octomap message to an octomap object
+        auto abstract_octree = octomap_msgs::msgToMap(*msg);
+        octomap::OcTree* octree = dynamic_cast<octomap::OcTree*>(abstract_octree);
+
+        // Initialize variables for size and maximum values
+        size_t numNodes = octree->size();
+        double maxX = -std::numeric_limits<double>::max();
+        double maxY = -std::numeric_limits<double>::max();
+        double maxZ = -std::numeric_limits<double>::max();
+
+        double minX = std::numeric_limits<double>::max();
+        double minY = std::numeric_limits<double>::max();
+        double minZ = std::numeric_limits<double>::max();
+
+        // Iterate over the leaf nodes of the octomap
+        for (auto it = octree->begin_leafs(); it != octree->end_leafs(); ++it) {
+            // Convert from world-frame to camera-frame
+            
+
+            minX = std::min(minX, it.getX());
+            minY = std::min(minY, it.getY());
+            minZ = std::min(minZ, it.getZ());
+
+            maxX = std::max(maxX, it.getX());
+            maxY = std::max(maxY, it.getY());
+            maxZ = std::max(maxZ, it.getZ());
+        }
+
+        // Print the size and maximum values
+        ROS_INFO("Octomap Size: %zu", numNodes);
+        ROS_INFO("Min X: %f , Max X: %f", minX, maxX);
+        ROS_INFO("Min Y: %f , Max Y: %f", minY, maxY);
+        ROS_INFO("Min Z: %f , Max Z: %f", minZ, maxZ);
+
+        delete octree;
     }
 
     void update_global_3d_map(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
@@ -109,6 +152,22 @@ public:
         }
 
         return occupancy_grid;
+    }
+
+    void transform_point_cloud_cb(const sensor_msgs::PointCloud2::ConstPtr& msg){
+        // Convert msg into a point-cloud-object
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+        pcl::fromROSMsg(*msg, *cloud);
+
+        for(auto& point : cloud->points){
+            point.x *= -1;
+            point.y *= -1; 
+        }
+        // Convert the pcl::PointCloud back to sensor_msgs::PointCloud2
+        sensor_msgs::PointCloud2 transformed_cloud;
+        pcl::toROSMsg(*cloud, transformed_cloud);
+        transformed_cloud.header = msg->header;
+        transformed_point_cloud_pub.publish(transformed_cloud);
     }
 
     void point_cloud_cb(const sensor_msgs::PointCloud2::ConstPtr& msg){
