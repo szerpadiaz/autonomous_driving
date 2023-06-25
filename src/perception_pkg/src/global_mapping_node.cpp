@@ -86,18 +86,29 @@ public:
         double minY = std::numeric_limits<double>::max();
         double minZ = std::numeric_limits<double>::max();
 
+        tf::TransformListener tf_listener;
+        tf::StampedTransform  cam_transform;
+        try {
+            tf_listener.waitForTransform("camera", "world", ros::Time(0), ros::Duration(3.0));
+            tf_listener.lookupTransform("camera", "world", ros::Time(0), cam_transform);
+        } catch (tf::TransformException& ex) {
+            ROS_ERROR("Failed to lookup world-to-cam-frame transform: %s", ex.what());
+        }
+
         // Iterate over the leaf nodes of the octomap
         for (auto it = octree->begin_leafs(); it != octree->end_leafs(); ++it) {
             // Convert from world-frame to camera-frame
+            tf::Vector3 map_point(it.getX(), it.getY(), it.getZ());
+            //tf::Vector3 cam_point = cam_transform * map_point;
+            tf::Vector3 cam_point =  map_point;
             
+            minX = std::min(minX, cam_point.x());
+            minY = std::min(minY, cam_point.y());
+            minZ = std::min(minZ, cam_point.z());
 
-            minX = std::min(minX, it.getX());
-            minY = std::min(minY, it.getY());
-            minZ = std::min(minZ, it.getZ());
-
-            maxX = std::max(maxX, it.getX());
-            maxY = std::max(maxY, it.getY());
-            maxZ = std::max(maxZ, it.getZ());
+            maxX = std::max(maxX, cam_point.x());
+            maxY = std::max(maxY, cam_point.y());
+            maxZ = std::max(maxZ, cam_point.z());
         }
 
         // Print the size and maximum values
@@ -105,6 +116,52 @@ public:
         ROS_INFO("Min X: %f , Max X: %f", minX, maxX);
         ROS_INFO("Min Y: %f , Max Y: %f", minY, maxY);
         ROS_INFO("Min Z: %f , Max Z: %f", minZ, maxZ);
+
+        minY = -100;
+        minZ = -100;
+        // Create an occupancy grid
+        nav_msgs::OccupancyGrid occupancy_grid_msg;
+        occupancy_grid_msg.header.frame_id = "world";
+        occupancy_grid_msg.header.stamp = ros::Time::now();
+        occupancy_grid_msg.info.resolution = 1;
+        occupancy_grid_msg.info.width = 300; //(maxY - minY);
+        occupancy_grid_msg.info.height = 300; //(maxZ - minZ) ;
+        occupancy_grid_msg.info.origin.position.x = 0;
+        occupancy_grid_msg.info.origin.position.y = minY;
+        occupancy_grid_msg.info.origin.position.z = minZ;
+        occupancy_grid_msg.info.origin.orientation.w = 1;
+        occupancy_grid_msg.data = std::vector<int8_t>((occupancy_grid_msg.info.width * occupancy_grid_msg.info.height), -1);
+
+        for (auto it = octree->begin_leafs(); it != octree->end_leafs(); ++it) {
+            if (octree->isNodeOccupied(*it)) {
+                // Convert from world-frame to camera-frame
+                tf::Vector3 map_point(it.getX(), it.getY(), it.getZ());
+                //tf::Vector3 cam_point = cam_transform * map_point;
+                tf::Vector3 cam_point =  map_point;
+
+                // Convert the 3D point to grid indices
+                int grid_y = (cam_point.y() - minY) / occupancy_grid_msg.info.resolution;
+                int grid_z = (cam_point.z() - minZ) / occupancy_grid_msg.info.resolution;
+                // Set the corresponding cell as occupied
+                int index = grid_z * occupancy_grid_msg.info.width + grid_y;
+                //ROS_INFO("index: %d (total = %d)", index, occupancy_grid_msg.info.width * occupancy_grid_msg.info.height);
+
+                if(index < occupancy_grid_msg.info.width * occupancy_grid_msg.info.height){
+                    // Check if the point falls within the desired y-range
+                    if (cam_point.x() > 0.1 && cam_point.x() < 5) {
+
+                        occupancy_grid_msg.data[index] = 100;
+                    }
+                    else
+                    {
+                        occupancy_grid_msg.data[index] = 0;
+                    }
+                }
+            }
+        }
+
+        occupancy_grid_pub.publish(occupancy_grid_msg);
+
 
         delete octree;
     }
