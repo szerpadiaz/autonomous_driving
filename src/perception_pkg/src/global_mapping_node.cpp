@@ -11,7 +11,7 @@
 
 #include <octomap_msgs/conversions.h>
 #include <tf/transform_listener.h>
-
+#include <pcl/common/transforms.h>
 
 class global_mapping_node{
     ros::NodeHandle nh;
@@ -45,11 +45,11 @@ class global_mapping_node{
 public:
     global_mapping_node() : octree(1) {
         transformed_point_cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("transformed_cloud", 1);
-        //point_cloud_sub = nh.subscribe("points_cloud", 1, &global_mapping_node::transform_point_cloud_cb, this);
+        point_cloud_sub = nh.subscribe("points_cloud", 1, &global_mapping_node::transform_point_cloud_cb, this);
         octomap_pub = nh.advertise<octomap_msgs::Octomap>("octomap", 1);
         occupancy_grid_pub = nh.advertise<nav_msgs::OccupancyGrid>("occupancy_grid_map", 1);
 
-        octomap_full_sub = nh.subscribe("octomap_full", 1, &global_mapping_node::transform_3d_into_2d_map, this);
+        //octomap_full_sub = nh.subscribe("octomap_full", 1, &global_mapping_node::transform_3d_into_2d_map, this);
         octomap::OcTree octree(resolution);
         octree.setOccupancyThres(occupancy_threshold);
         octree.setProbHit(occupancy_probability_hit);
@@ -101,7 +101,7 @@ public:
             tf::Vector3 map_point(it.getX(), it.getY(), it.getZ());
             //tf::Vector3 cam_point = cam_transform * map_point;
             tf::Vector3 cam_point =  map_point;
-            
+
             minX = std::min(minX, cam_point.x());
             minY = std::min(minY, cam_point.y());
             minZ = std::min(minZ, cam_point.z());
@@ -216,10 +216,29 @@ public:
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
         pcl::fromROSMsg(*msg, *cloud);
 
-        for(auto& point : cloud->points){
-            point.x *= -1;
-            point.y *= -1; 
-        }
+        // Define the transformation matrices for the individual rotations
+        Eigen::Matrix4f transformationX = Eigen::Matrix4f::Identity();
+        Eigen::Matrix4f transformationZ = Eigen::Matrix4f::Identity();
+        
+        float angleX = -M_PI / 2.0;  // -90 degrees in radians around X-axis
+        float angleZ = 0; //M_PI / 2.0;  // 0 degrees in radians around Z-axis
+        
+        transformationX(1, 1) = cos(angleX);
+        transformationX(1, 2) = -sin(angleX);
+        transformationX(2, 1) = sin(angleX);
+        transformationX(2, 2) = cos(angleX);
+        
+        transformationZ(0, 0) = cos(angleZ);
+        transformationZ(0, 1) = -sin(angleZ);
+        transformationZ(1, 0) = sin(angleZ);
+        transformationZ(1, 1) = cos(angleZ);
+        
+        // Combine the transformations by multiplying them
+        Eigen::Matrix4f combinedTransformation = transformationZ * transformationX;
+        
+        // Perform the transformation on each point in the cloud
+        pcl::transformPointCloud(*cloud, *cloud, combinedTransformation);
+
         // Convert the pcl::PointCloud back to sensor_msgs::PointCloud2
         sensor_msgs::PointCloud2 transformed_cloud;
         pcl::toROSMsg(*cloud, transformed_cloud);
