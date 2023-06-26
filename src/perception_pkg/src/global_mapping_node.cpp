@@ -239,9 +239,25 @@ public:
         // Perform the transformation on each point in the cloud
         pcl::transformPointCloud(*cloud, *cloud, combinedTransformation);
 
+        float radius = 1.0; // 1-meter radius
+        pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud(new pcl::PointCloud<pcl::PointXYZ>);
+        // Iterate over each point in the cloud
+        for (const pcl::PointXYZ& point : cloud->points) {
+            // Check if the point is within the specified radius
+            if (std::sqrt(point.x * point.x + point.y * point.y) > radius) {
+                // Point is within the radius, add it to the filtered cloud
+                filteredCloud->points.push_back(point);
+            }
+        }
+
+        // Update the header information of the filtered cloud
+        filteredCloud->header = cloud->header;
+        filteredCloud->width = filteredCloud->points.size();
+        filteredCloud->height = 1;
+
         // Convert the pcl::PointCloud back to sensor_msgs::PointCloud2
         sensor_msgs::PointCloud2 transformed_cloud;
-        pcl::toROSMsg(*cloud, transformed_cloud);
+        pcl::toROSMsg(*filteredCloud, transformed_cloud);
         transformed_cloud.header = msg->header;
         transformed_point_cloud_pub.publish(transformed_cloud);
     }
