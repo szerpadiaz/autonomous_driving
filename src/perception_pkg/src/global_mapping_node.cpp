@@ -12,6 +12,8 @@
 #include <octomap_msgs/conversions.h>
 #include <tf/transform_listener.h>
 #include <pcl/common/transforms.h>
+#include <pcl/kdtree/kdtree_flann.h>
+#include <unordered_set>
 
 class global_mapping_node{
     ros::NodeHandle nh;
@@ -44,8 +46,8 @@ class global_mapping_node{
 
 public:
     global_mapping_node() : octree(1) {
-        transformed_point_cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("transformed_cloud", 1);
-        point_cloud_sub = nh.subscribe("points_cloud", 1, &global_mapping_node::transform_point_cloud_cb, this);
+        transformed_point_cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("transformed_cloud", 10);
+        point_cloud_sub = nh.subscribe("points_cloud", 10, &global_mapping_node::transform_point_cloud_cb, this);
         octomap_pub = nh.advertise<octomap_msgs::Octomap>("octomap", 1);
         occupancy_grid_pub = nh.advertise<nav_msgs::OccupancyGrid>("occupancy_grid_map", 1);
 
@@ -218,48 +220,73 @@ public:
 
         // Define the transformation matrices for the individual rotations
         Eigen::Matrix4f transformationX = Eigen::Matrix4f::Identity();
-        Eigen::Matrix4f transformationZ = Eigen::Matrix4f::Identity();
-        
         float angleX = -M_PI / 2.0;  // -90 degrees in radians around X-axis
-        float angleZ = 0; //M_PI / 2.0;  // 0 degrees in radians around Z-axis
-        
         transformationX(1, 1) = cos(angleX);
         transformationX(1, 2) = -sin(angleX);
         transformationX(2, 1) = sin(angleX);
         transformationX(2, 2) = cos(angleX);
         
-        transformationZ(0, 0) = cos(angleZ);
-        transformationZ(0, 1) = -sin(angleZ);
-        transformationZ(1, 0) = sin(angleZ);
-        transformationZ(1, 1) = cos(angleZ);
-        
-        // Combine the transformations by multiplying them
-        Eigen::Matrix4f combinedTransformation = transformationZ * transformationX;
-        
         // Perform the transformation on each point in the cloud
-        pcl::transformPointCloud(*cloud, *cloud, combinedTransformation);
+        pcl::transformPointCloud(*cloud, *cloud, transformationX);
 
         float radius = 1.0; // 1-meter radius
         pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud(new pcl::PointCloud<pcl::PointXYZ>);
         // Iterate over each point in the cloud
         for (const pcl::PointXYZ& point : cloud->points) {
             // Check if the point is within the specified radius
-            if (std::sqrt(point.x * point.x + point.y * point.y) > radius) {
-                // Point is within the radius, add it to the filtered cloud
-                filteredCloud->points.push_back(point);
+            if (!std::isnan(point.x) && !std::isnan(point.y) && !std::isnan(point.z)){
+                if (std::sqrt(point.x * point.x + point.y * point.y) > radius) {
+                    // Point is within the radius, add it to the filtered cloud
+                    filteredCloud->points.push_back(point);
+                }
             }
-        }
 
+        }
         // Update the header information of the filtered cloud
         filteredCloud->header = cloud->header;
         filteredCloud->width = filteredCloud->points.size();
         filteredCloud->height = 1;
+
+        dilatePointCloud(filteredCloud, 1.0, 2, 50);
 
         // Convert the pcl::PointCloud back to sensor_msgs::PointCloud2
         sensor_msgs::PointCloud2 transformed_cloud;
         pcl::toROSMsg(*filteredCloud, transformed_cloud);
         transformed_cloud.header = msg->header;
         transformed_point_cloud_pub.publish(transformed_cloud);
+    }
+
+    void dilatePointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, float dilation_radius, int iterations, int max_neighbors) {
+        pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
+        kdtree.setInputCloud(cloud);
+
+        std::vector<pcl::PointXYZ, Eigen::aligned_allocator<pcl::PointXYZ>> dilated_points;
+        dilated_points.reserve(cloud->size());  // Reserve memory for faster insertion
+
+        for (int i = 0; i < iterations; ++i) {
+            std::unordered_set<int> unique_indices;
+
+            for (int j = 0; j < cloud->size(); ++j) {
+                pcl::PointXYZ search_point = cloud->points[j];
+
+                std::vector<int> indices;
+                std::vector<float> distances;
+                kdtree.radiusSearch(search_point, dilation_radius, indices, distances, max_neighbors);
+
+                for (int k = 0; k < indices.size(); ++k) {
+                    int index = indices[k];
+                    unique_indices.insert(index);
+                }
+            }
+
+            for (int index : unique_indices) {
+                dilated_points.push_back(cloud->points[index]);
+            }
+        }
+
+        cloud->points = dilated_points;
+        cloud->width = cloud->points.size();
+        cloud->height = 1;
     }
 
     void point_cloud_cb(const sensor_msgs::PointCloud2::ConstPtr& msg){
