@@ -247,7 +247,7 @@ public:
         filteredCloud->width = filteredCloud->points.size();
         filteredCloud->height = 1;
 
-        dilatePointCloud(filteredCloud, 1.0, 2, 50);
+        dilatePointCloud(filteredCloud, 0.9, 2, 50);
 
         // Convert the pcl::PointCloud back to sensor_msgs::PointCloud2
         sensor_msgs::PointCloud2 transformed_cloud;

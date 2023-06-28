@@ -61,4 +61,6 @@
 <node pkg="perception_pkg" type="global_mapping_node" name="global_mapping_node" output="screen"> </node>
 <!-- <node pkg="rviz" type="rviz" name="rviz" args="-d $(find perception_pkg)/cfg/global_map.rviz"/> -->
 
+<node pkg="perception_pkg" type="global_mapping_2Dmap_node" name="global_mapping_2Dmap_node" output="screen"> </node>
+
 </launch>

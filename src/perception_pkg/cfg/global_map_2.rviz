@@ -8,6 +8,7 @@ Panels:
         - /Status1
         - /Axes1
         - /Axes2
+        - /Map1
         - /TF1
         - /Axes3
         - /Map2
@@ -238,7 +239,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 387.0184326171875
+      Distance: 641.8717041015625
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -254,7 +255,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.5697963237762451
+      Pitch: 1.5247963666915894
       Target Frame: <Fixed Frame>
       Yaw: 6.257596969604492
     Saved: ~
