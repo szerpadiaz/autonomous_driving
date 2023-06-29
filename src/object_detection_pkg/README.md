@@ -1,9 +1,17 @@
 # Object_detection_pkg
-roslaunch simulation simulation.launch
-then echor the topic with 
+first option-
+roscore and run the nodes with to see the result:
+-	rosrun object_detection_pkg cars_detection.py
+-	rosrun object_detection_pkg traffic_light_color.py
+-	rosrun object_detection_pkg traffic_light_depth.py
+
+second option-
+roslaunch simulation simulation.launch.
+then echo the topic with 
 -	rostopic echo traffic_light_color
 -	rostopic echo traffic_light_position
 -	rostopic echo position_of_cars
+
 Type and how see/access the topic msg like below:
 -	Traffic light color: String msg 
 -	Traffic light depth position topic: Float32 msg 
