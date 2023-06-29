@@ -15,11 +15,13 @@ def segmentation_callback(segmentation_msg):
     bridge = CvBridge()
     try:
         # Convert the received segmentation image message to OpenCV format
-        segmentation_image = bridge.imgmsg_to_cv2(segmentation_msg, desired_encoding="passthrough")
-        # Convert the segmentation image to RGB
-        segmentation_image = cv2.cvtColor(segmentation_image, cv2.COLOR_BGR2RGB)
+        seg_image = bridge.imgmsg_to_cv2(segmentation_msg, desired_encoding="passthrough")
         # Increase the resolution of the segmentation image
+        segmentation_image = cv2.cvtColor(seg_image, cv2.COLOR_BGR2RGB)
         segmentation_image = cv2.resize(segmentation_image, (new_width, new_height))
+        # Extract the new image containing the two middle parts
+        segmentation_image = segmentation_image[:,360:720]
+        cv2.imwrite("segment2.jpg", segmentation_image)
     except CvBridgeError as e:
         rospy.logerr("CvBridge Error: {0}".format(e))
 
@@ -29,81 +31,94 @@ def rgb_callback(rgb_msg):
     bridge = CvBridge()
     try:
         # Convert the received RGB image message to OpenCV format
-        rgb_image_bgr = bridge.imgmsg_to_cv2(rgb_msg, desired_encoding="passthrough")
-        rgb_image_rgb = cv2.cvtColor(rgb_image_bgr, cv2.COLOR_BGR2RGB)
+        image = bridge.imgmsg_to_cv2(rgb_msg, desired_encoding="passthrough")
         # Increase the resolution of the RGB image
+        rgb_image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         rgb_image_rgb = cv2.resize(rgb_image_rgb, (new_width, new_height))
+        rgb_image_rgb = rgb_image_rgb[:,360:720]
+
+        cv2.imwrite("rgb2.jpg", rgb_image_rgb)
         # Check if the segmentation image is available
         if segmentation_image is not None:
             # Threshold the semantic segmentation image to create a binary mask
             aqua_color = np.array([0, 255, 255])
             threshold = 200  # Adjust this threshold value to segment your object accurately
-            mask = np.linalg.norm(segmentation_image - aqua_color, axis=2) < threshold
+            mask = (np.linalg.norm(segmentation_image - aqua_color, axis=2) < threshold)
             mask = mask.astype(np.uint8) * 255
 
             # Find contours in the binary mask
             contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-            # Select the contour that corresponds to object
-            selected_contour = [contour for contour in contours if cv2.contourArea(contour) > 50][0]
+            if len(contours) > 0:
+                # Select the contour that corresponds to the object
+                selected_contour = max(contours, key=cv2.contourArea)
+                # Check if the contour area is greater than 50
+                if cv2.contourArea(selected_contour) > 50:
+                    # Create a mask with the same shape as the RGB image and fill the contour region
+                    new_mask = np.zeros_like(rgb_image_rgb)
+                    cv2.drawContours(new_mask, [selected_contour], 0, (255, 255, 255), cv2.FILLED)
 
-            # Create a mask with the same shape as the RGB image and fill the contour region
-            new_mask = np.zeros_like(rgb_image_rgb)
-            cv2.drawContours(new_mask, [selected_contour], 0, (255, 255, 255), cv2.FILLED)
+                    # Apply the new mask to the RGB image to crop out the region of your object
+                    cropped_image_rgb = cv2.bitwise_and(rgb_image_rgb, new_mask)
 
-            # Apply the new mask to the RGB image to crop out the region of your object
-            cropped_image_rgb = cv2.bitwise_and(rgb_image_rgb, new_mask)
+                    # # Convert the cropped image back to BGR format
+                    # cropped_image_bgr = cv2.cvtColor(cropped_image_rgb, cv2.COLOR_RGB2BGR)
 
-            # Convert the cropped image back to BGR format
-            cropped_image_bgr = cv2.cvtColor(cropped_image_rgb, cv2.COLOR_RGB2BGR)
+                    # Find the bounding box coordinates of the contour
+                    x, y, w, h = cv2.boundingRect(selected_contour)
 
-            # Find the bounding box coordinates of the contour
-            x, y, w, h = cv2.boundingRect(selected_contour)
+                    # Draw the bounding box on the original RGB image
+                    bounding_box_image = cropped_image_rgb.copy()
+                    cv2.rectangle(bounding_box_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                    cv2.imwrite("bounding_box_image.jpg", bounding_box_image)
 
-            # Draw the bounding box on the original RGB image
-            bounding_box_image = rgb_image_bgr.copy()
-            cv2.rectangle(bounding_box_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                    # Crop out the region within the bounding box
+                    cropped_image_rgb = cropped_image_rgb[y:y+h, x:x+w]
 
-            # Crop out the region within the bounding box
-            cropped_image_bgr = cropped_image_bgr[y:y+h, x:x+w]
+                    # Convert the cropped image to the HSV color space
+                    hsv_image = cv2.cvtColor(cropped_image_rgb, cv2.COLOR_BGR2HSV)
 
-            # Convert the cropped image to the HSV color space
-            hsv_image = cv2.cvtColor(cropped_image_bgr, cv2.COLOR_BGR2HSV)
+                    # Define the color ranges for red, yellow, and green
+                    red_lower = np.array([0, 100, 100])
+                    red_upper = np.array([10, 255, 255])
 
-            # Define the color ranges for red, yellow, and green
-            red_lower = np.array([0, 100, 100])
-            red_upper = np.array([10, 255, 255])
+                    yellow_lower = np.array([25, 100, 100])
+                    yellow_upper = np.array([35, 255, 255])
 
-            yellow_lower = np.array([25, 100, 100])
-            yellow_upper = np.array([35, 255, 255])
+                    green_lower = np.array([50, 100, 100])
+                    green_upper = np.array([70, 255, 255])
 
-            green_lower = np.array([50, 100, 100])
-            green_upper = np.array([70, 255, 255])
+                    # Apply color thresholding to detect red, yellow, and green regions
+                    red_mask = cv2.inRange(hsv_image, red_lower, red_upper)
+                    yellow_mask = cv2.inRange(hsv_image, yellow_lower, yellow_upper)
+                    green_mask = cv2.inRange(hsv_image, green_lower, green_upper)
 
-            # Apply color thresholding to detect red, yellow, and green regions
-            red_mask = cv2.inRange(hsv_image, red_lower, red_upper)
-            yellow_mask = cv2.inRange(hsv_image, yellow_lower, yellow_upper)
-            green_mask = cv2.inRange(hsv_image, green_lower, green_upper)
+                    # Count the number of non-zero pixels in each mask
+                    red_pixel_count = cv2.countNonZero(red_mask)
+                    yellow_pixel_count = cv2.countNonZero(yellow_mask)
+                    green_pixel_count = cv2.countNonZero(green_mask)
 
-            # Count the number of non-zero pixels in each mask
-            red_pixel_count = cv2.countNonZero(red_mask)
-            yellow_pixel_count = cv2.countNonZero(yellow_mask)
-            green_pixel_count = cv2.countNonZero(green_mask)
+                    # Determine the dominant color based on the pixel counts
+                    if red_pixel_count > yellow_pixel_count and red_pixel_count > green_pixel_count:
+                        dominant_color = "Red"
+                        cv2.imwrite("bounding_box_image_red.jpg", bounding_box_image)
+                    # elif yellow_pixel_count > red_pixel_count and yellow_pixel_count > green_pixel_count:
+                    #     dominant_color = "Yellow"
+                    #     cv2.imwrite("bounding_box_image_yellow.jpg", bounding_box_image)
+                    else:
+                        dominant_color = "Green"
+                        cv2.imwrite("bounding_box_image_green.jpg", bounding_box_image)
 
-            # Determine the dominant color based on the pixel counts
-            if red_pixel_count > yellow_pixel_count and red_pixel_count > green_pixel_count:
-                dominant_color = "Red"
-            elif yellow_pixel_count > red_pixel_count and yellow_pixel_count > green_pixel_count:
-                dominant_color = "Yellow"
+                    # Print the dominant color
+                    print("Dominant Color:", dominant_color)
+                    # Publish the dominant color as a String message
+                    color_msg = String()
+                    color_msg.data = dominant_color
+                    pub.publish(color_msg)
+                else:
+                    print("No contour with area greater than 50 found.")
             else:
-                dominant_color = "Green"
-
-            # Print the dominant color
-            print("Dominant Color:", dominant_color)
-            # Publish the dominant color as a String message
-            color_msg = String()
-            color_msg.data = dominant_color
-            pub.publish(color_msg)
+                print("No contours found.")
 
     except CvBridgeError as e:
         rospy.logerr("CvBridge Error: {0}".format(e))
@@ -112,7 +127,7 @@ def rgb_callback(rgb_msg):
 rospy.init_node("traffic_light_color")
 
 # Create a publisher to publish the processed dominant color
-pub = rospy.Publisher("traffic_light_color", String, queue_size=10)
+pub = rospy.Publisher("traffic_light_color", String, queue_size=1)
 
 # Set the desired resolution for the images
 new_width = 1280  # Adjust the width as desired
