@@ -29,3 +29,6 @@ rostopic echo traffic_light_color
 rostopic echo traffic_light_position
 rostopic echo position_of_cars (x,z is the position of the car in 2D map; y is just the height of the car)
 
+Questions:
+- How to reduce the time latency / difference between simulation and node for traffic light color? For red color for example, 1 second delay
+
