@@ -102,9 +102,9 @@ def rgb_callback(rgb_msg):
                     if red_pixel_count > yellow_pixel_count and red_pixel_count > green_pixel_count:
                         dominant_color = "Red"
                         cv2.imwrite("bounding_box_image_red.jpg", bounding_box_image)
-                    # elif yellow_pixel_count > red_pixel_count and yellow_pixel_count > green_pixel_count:
-                    #     dominant_color = "Yellow"
-                    #     cv2.imwrite("bounding_box_image_yellow.jpg", bounding_box_image)
+                    elif yellow_pixel_count > red_pixel_count and yellow_pixel_count > green_pixel_count:
+                        dominant_color = "Yellow"
+                        cv2.imwrite("bounding_box_image_yellow.jpg", bounding_box_image)
                     else:
                         dominant_color = "Green"
                         cv2.imwrite("bounding_box_image_green.jpg", bounding_box_image)
