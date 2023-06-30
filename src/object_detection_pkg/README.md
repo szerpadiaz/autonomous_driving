@@ -3,7 +3,7 @@ first option-
 roscore and run the nodes with to see the result:
 -	rosrun object_detection_pkg cars_detection.py
 -	rosrun object_detection_pkg traffic_light_color.py
--	rosrun object_detection_pkg traffic_light_depth.py
+-	rosrun object_detection_pkg traffic_light_depth_position.py
 
 second option-
 roslaunch simulation simulation.launch.
