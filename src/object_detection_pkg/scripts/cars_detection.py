@@ -4,9 +4,12 @@ from cv_bridge import CvBridge, CvBridgeError
 import cv2
 import numpy as np
 from geometry_msgs.msg import Point
+from pcl_msgs.msg import PointCloud2 as pcl2
+import pcl
 
 original_center_x = 0
 original_center_y = 0
+contours = []
 
 # Callback function to process the received messages
 def segmentation_callback(segmentation_msg):
@@ -62,6 +65,10 @@ def depth_callback(depth_msg):
     bridge = CvBridge()
     try:
         depth_image = bridge.imgmsg_to_cv2(depth_msg, desired_encoding="passthrough")
+        # pcl_cloud = convert_contours_to_pcl_cloud(contours, depth_image)
+        # point_cloud_msg = pcl2.create_cloud_xyz32(header=rospy.Header(frame_id='true_body'), cloud=pcl_cloud)
+        # publish point_cloud_msg
+
         # Retrieve the depth value of the current pixel
         depth = depth_image[original_center_y, original_center_x]
 
@@ -85,6 +92,26 @@ def depth_callback(depth_msg):
         rospy.logerr("CvBridge Error: {0}".format(e))
         return
 
+def convert_contours_to_pcl_cloud(contours, depth_image):
+    # Create a list to store the points
+    points = []
+
+    # Iterate over the contours and convert each point to 3D
+    for contour in contours:
+        for point in contour:
+            x = point[0][0]
+            y = point[0][1]
+            depth = depth_image[y, x]
+            z_3d = depth
+            x_3d = z_3d * 29 / 120
+            y_3d = z_3d / 60
+            points.append([x_3d, y_3d, z_3d])
+
+    # Create point cloud object
+    pcl_cloud = pcl.PointCloud()
+    pcl_cloud.from_list(points)
+
+    return pcl_cloud
 
 # Initialize the ROS node
 rospy.init_node("cars_detection")
@@ -100,3 +127,4 @@ rospy.Subscriber(depth_topic, Image, depth_callback)
 
 # Spin ROS
 rospy.spin()
+
