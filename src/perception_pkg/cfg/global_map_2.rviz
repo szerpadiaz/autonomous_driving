@@ -150,12 +150,12 @@ Visualization Manager:
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: false
-      Enabled: true
+      Enabled: false
       Name: Map
       Topic: /projected_map
       Unreliable: false
       Use Timestamp: false
-      Value: true
+      Value: false
     - Class: rviz/TF
       Enabled: true
       Filter (blacklist): ""
@@ -166,6 +166,8 @@ Visualization Manager:
         OurCar/Sensors/DepthCamera:
           Value: true
         OurCar/Sensors/RGBCameraLeft:
+          Value: true
+        OurCar/Sensors/SemanticCamera:
           Value: true
         camera:
           Value: true
@@ -187,6 +189,8 @@ Visualization Manager:
             camera:
               OurCar/Sensors/RGBCameraLeft:
                 {}
+              OurCar/Sensors/SemanticCamera:
+                {}
             depth_camera:
               OurCar/Sensors/DepthCamera:
                 {}
@@ -205,12 +209,12 @@ Visualization Manager:
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: false
-      Enabled: false
+      Enabled: true
       Name: Map
-      Topic: /occupancy_grid_map
+      Topic: /projected_map_2
       Unreliable: false
       Use Timestamp: false
-      Value: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -239,7 +243,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 641.8717041015625
+      Distance: 138.43321228027344
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
