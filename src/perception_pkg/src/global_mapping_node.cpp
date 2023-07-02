@@ -1,148 +1,72 @@
 #include <ros/ros.h>
-#include <octomap/octomap.h>
-#include <octomap_msgs/Octomap.h>
+
 #include <sensor_msgs/PointCloud2.h>
-#include <nav_msgs/OccupancyGrid.h>
+
+#include <tf/transform_listener.h>
 
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <pcl_conversions/pcl_conversions.h>
-
-#include <octomap_msgs/conversions.h>
-#include <tf/transform_listener.h>
-
+#include <pcl/common/transforms.h>
+#include <pcl/kdtree/kdtree_flann.h>
+#include <unordered_set>
 
 class global_mapping_node{
     ros::NodeHandle nh;
-    tf::StampedTransform  world_transform;
     ros::Subscriber point_cloud_sub;
-    ros::Publisher octomap_pub;
-    ros::Publisher occupancy_grid_pub;
-    octomap::OcTree octree;
-    float rel_min_x = -5;
-    float rel_max_x = 5;
-    float rel_min_y = 0;
-    float rel_max_y = 10;
-    float rel_min_z = 1.0;
-    float rel_max_z = 5.0;
-    float resolution = 1.0;
-    float occupancy_threshold = 0.5; 
-    float occupancy_probability_hit = 0.6;
-    float occupancy_probability_miss = 0.4;
-    float occupancy_clamping_min = 0.1;
-    float occupancy_clamping_max = 0.9;
-    float abs_min_x = -60;
-    float abs_min_y = -60;
-    uint32_t grid_width = 600;
-    uint32_t grid_height = 600;
-    float grid_origin_x = -150;
-    float grid_origin_y = -100;
+    ros::Publisher transformed_point_cloud_pub;
 
 public:
-    global_mapping_node() : octree(1) {
-        point_cloud_sub = nh.subscribe("points_cloud", 10, &global_mapping_node::point_cloud_cb, this);
-        octomap_pub = nh.advertise<octomap_msgs::Octomap>("octomap", 10);
-        occupancy_grid_pub = nh.advertise<nav_msgs::OccupancyGrid>("occupancy_grid_map", 10);
-        octomap::OcTree octree(resolution);
-        octree.setOccupancyThres(occupancy_threshold);
-        octree.setProbHit(occupancy_probability_hit);
-        octree.setProbMiss(occupancy_probability_miss);
-        octree.setClampingThresMin(occupancy_clamping_min);
-        octree.setClampingThresMax(occupancy_clamping_max);
-
+    global_mapping_node() {
+        point_cloud_sub = nh.subscribe("points_cloud", 10, &global_mapping_node::transform_point_cloud_cb, this);
+        transformed_point_cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("transformed_cloud", 10);
     }
 
-    bool update_world_transform(){
-        bool success = false;
-        tf::TransformListener tf_listener;
-        try {
-            tf_listener.waitForTransform("world", "camera", ros::Time(0), ros::Duration(3.0));
-            tf_listener.lookupTransform("world", "camera", ros::Time(0), world_transform);
-            success = true;
-        } catch (tf::TransformException& ex) {
-            ROS_ERROR("Failed to lookup world-frame transform: %s", ex.what());
-        }
-        return success;
-    }
-
-    void update_global_3d_map(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
-
-        for(const auto& point : cloud->points){
-            if (std::isfinite(point.x) && std::isfinite(point.y) && std::isfinite(point.z)) {
-
-                if((point.x < rel_min_x || point.x > rel_max_x) || (point.y < rel_min_y || point.y > rel_max_y) || (point.z < rel_min_z || point.z > rel_max_z)){
-                    //ROS_INFO("Point cloud x = %f, y = %f, z = %f", point.x, point.y, point.z);
-                    continue;
-                }
-                
-                //ROS_INFO("Point cloud x = %f, y = %f, z = %f", point.x, point.y, point.z);
-                tf::Vector3 point_cloud(point.x, point.y, point.z);
-                tf::Vector3 point_map = world_transform * point_cloud;
-                auto x = (point_map.x() - abs_min_x) / resolution;
-                auto y = (point_map.y() - abs_min_y) / resolution;
-                auto z = point_map.z();
-                octomap::OcTreeKey key = octree.coordToKey(octomap::point3d(x, y, z));
-                octree.updateNode(key, true);
-            }
-        }
-    }
-    
-    std::vector<int8_t> convert_3d_map_into_2d_occupancy_grid(){
-
-        auto occupancy_grid = std::vector<int8_t>(grid_width * grid_height, 0);
-
-        for (auto it = octree.begin_leafs(); it != octree.end_leafs(); ++it) {
-            if (octree.isNodeOccupied(*it)) {
-
-                octomap::point3d octo_node_center = octree.keyToCoord(it.getKey()); 
-                int grid_x = static_cast<int>((octo_node_center.x() - grid_origin_x) / resolution);
-                int grid_y = static_cast<int>((octo_node_center.y() - grid_origin_y) / resolution);
-                unsigned int index = grid_x * grid_width + grid_y;
-
-                if (grid_x >= 0 && grid_x < grid_width && grid_y >= 0 && grid_y < grid_height) {
-                    occupancy_grid[index] = 100;
-                }
-                
-                ROS_INFO("grid_x = %d and grid_y = %d (x = %f and y =%f) ", grid_x, grid_y, octo_node_center.x(), octo_node_center.y());
-            }
-        }
-
-        return occupancy_grid;
-    }
-
-    void point_cloud_cb(const sensor_msgs::PointCloud2::ConstPtr& msg){
-        
-        if (!update_world_transform())
-        { 
-            return;
-        }
-
+    void transform_point_cloud_cb(const sensor_msgs::PointCloud2::ConstPtr& msg){
         // Convert msg into a point-cloud-object
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
         pcl::fromROSMsg(*msg, *cloud);
 
-        update_global_3d_map(cloud);
+        // Rotate point cloud points -90 degrees around X-axis
+        // This is to make it possible for the octomal to correctly generate the 2D map
+        Eigen::Matrix4f transformationX = Eigen::Matrix4f::Identity();
+        float angleX = -M_PI / 2.0;
+        transformationX(1, 1) = cos(angleX);
+        transformationX(1, 2) = -sin(angleX);
+        transformationX(2, 1) = sin(angleX);
+        transformationX(2, 2) = cos(angleX);
+        pcl::transformPointCloud(*cloud, *cloud, transformationX);
 
-        // send msg
-        octomap_msgs::Octomap map_msg;
-        octomap_msgs::fullMapToMsg(octree, map_msg);
-        map_msg.header.frame_id = "world";
-        octomap_pub.publish(map_msg);
+        // Filtered cloud to reduce the noise associated to measurements
+        //   - discard all points within a 1m radio because they might be too unstable
+        //   - discard points with an infinite or nan values
+        pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud(new pcl::PointCloud<pcl::PointXYZ>);
+        for (const pcl::PointXYZ& point : cloud->points) {
+            // If point is outside the specified radius, add it to the filtered cloud
+            if (!std::isnan(point.x) && !std::isnan(point.y) && !std::isnan(point.z)){
+                const bool is_outside_1m_radio = std::sqrt(point.x * point.x + point.y * point.y) > 1.0;
+                const bool is_within_depth = point.z > -5 && point.z < 10;
+                if (is_within_depth && is_outside_1m_radio) {
+                    filteredCloud->points.push_back(point);
+                }
+            }
+        }
+        // Update the header information of the filtered cloud
+        filteredCloud->header = cloud->header;
+        filteredCloud->width = filteredCloud->points.size();
+        filteredCloud->height = 1;
 
-        auto occupancy_grid = convert_3d_map_into_2d_occupancy_grid();
-        nav_msgs::OccupancyGrid occupancy_grid_msg;
-        occupancy_grid_msg.header.frame_id = "world";
-        occupancy_grid_msg.header.stamp = ros::Time::now();
-        occupancy_grid_msg.info.resolution = resolution;
-        occupancy_grid_msg.info.width = grid_width;
-        occupancy_grid_msg.info.height = grid_height;
-        occupancy_grid_msg.info.origin.position.x = grid_origin_x;
-        occupancy_grid_msg.info.origin.position.y = grid_origin_y;
-        occupancy_grid_msg.info.origin.position.z = 0;
-        occupancy_grid_msg.info.origin.orientation.w = 1;
-        occupancy_grid_msg.data = occupancy_grid;
-        occupancy_grid_pub.publish(occupancy_grid_msg);
+        //ROS_INFO("cloud->size(): %d", cloud->size());
+        //ROS_INFO("cloud->width: %d", cloud->width);
+        //ROS_INFO("cloud->height: %d", cloud->height);
+        //ROS_INFO("filteredCloud->size(): %d", filteredCloud->points.size());
+
+        // Publish the new cloud (transformed and filtered)
+        sensor_msgs::PointCloud2 transformed_cloud_msg;
+        pcl::toROSMsg(*filteredCloud, transformed_cloud_msg);
+        transformed_cloud_msg.header = msg->header;
+        transformed_point_cloud_pub.publish(transformed_cloud_msg);
     }
 };
 
