@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 
 import rospy
@@ -9,8 +10,8 @@ import math
 # Define the class for the trajectory predictor
 class TrajectoryPredictor:
     def __init__(self):
-        self.path_subscriber = rospy.Subscriber('/path_topic', Path, self.path_callback)
-        self.prediction_publisher = rospy.Publisher('/prediction_topic', Path, queue_size=10)
+        self.path_subscriber = rospy.Subscriber('path_for_trajectory', Path, self.path_callback)
+        self.prediction_publisher = rospy.Publisher('/trajectory', Path, queue_size=10)
 
     def path_callback(self, path_msg):
         # Extract the poses from the received path message
