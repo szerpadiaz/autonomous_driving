@@ -28,6 +28,11 @@ echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
 - Build project
 ```
 cd autonomous_driving
+sudo apt-get install python3-rosdep
+sudo rosdep init
+rosdep update
+rosdep install --from-paths src --ignore-src -r -y
+
 catkin build
 ```
 - Download the Unity Environment: https://syncandshare.lrz.de/getlink/fiEg9ocZ6Pc5iuEa4QqN1b/

@@ -17,7 +17,7 @@ public:
     }
 
     void projected_map_sub_cb(const nav_msgs::OccupancyGrid& input_grid) {
-        int iterations = 1;
+        int iterations = 3;
         nav_msgs::OccupancyGrid output_grid = input_grid;
         int width = input_grid.info.width;
         int height = input_grid.info.height;

@@ -34,7 +34,7 @@
 
     <!-- Height filtering for occupied cells in the map -->
     <param name="occupancy_min_z" value="-1.0" />
-    <param name="occupancy_max_z" value="4.0" />
+    <param name="occupancy_max_z" value="3.0" />
 
     <!-- Enable ground plane filtering -->
     <param name="filter_ground" value="false" />
@@ -45,12 +45,14 @@
 
 
     <!-- Sensor model probabilities (hits and misses) -->
-    <param name="sensor_model/hit" value="0.7" />
-    <param name="sensor_model/miss" value="0.4" />
+    <!-- -  Hit: probability of a cell being marked as occupied when a sensor measurement indicates a hit -->
+    <!-- -  miss: probability of a cell being marked as occupied when a sensor measurement indicates a hit -->
+    <param name="sensor_model/hit" value="0.93" />
+    <param name="sensor_model/miss" value="0.47" />
 
     <!-- Sensor model probability clamping range -->
-    <param name="sensor_model/min" value="0.12" />
-    <param name="sensor_model/max" value="0.97" />
+    <param name="sensor_model/min" value="0.1" />
+    <param name="sensor_model/max" value="0.99" />
 
     <!-- Whether topics are published latched -->
     <param name="latch" value="false" />
