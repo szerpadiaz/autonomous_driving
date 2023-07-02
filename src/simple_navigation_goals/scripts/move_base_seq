@@ -66,7 +66,7 @@ class MoveBaseSeq():
             rospy.loginfo("Goal pose "+str(self.goal_cnt)+" reached") 
             if self.goal_cnt< len(self.pose_seq):
                 next_goal = MoveBaseGoal()
-                next_goal.target_pose.header.frame_id = "map"
+                next_goal.target_pose.header.frame_id = "world"
                 next_goal.target_pose.header.stamp = rospy.Time.now()
                 next_goal.target_pose.pose = self.pose_seq[self.goal_cnt]
                 rospy.loginfo("Sending goal pose "+str(self.goal_cnt+1)+" to Action Server")
@@ -93,7 +93,7 @@ class MoveBaseSeq():
     def movebase_client(self):
     #for pose in pose_seq:   
         goal = MoveBaseGoal()
-        goal.target_pose.header.frame_id = "map"
+        goal.target_pose.header.frame_id = "world"
         goal.target_pose.header.stamp = rospy.Time.now() 
         goal.target_pose.pose = self.pose_seq[self.goal_cnt]
         rospy.loginfo("Sending goal pose "+str(self.goal_cnt+1)+" to Action Server")
