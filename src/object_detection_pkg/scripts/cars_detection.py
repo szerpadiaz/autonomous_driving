@@ -62,19 +62,13 @@ def depth_callback(depth_msg):
     bridge = CvBridge()
     try:
         depth_image = bridge.imgmsg_to_cv2(depth_msg, desired_encoding="passthrough")
-        # Get the camera intrinsics fu: 97.87426995358646, fv: 97.87426995358646, pu: 160.0, pv: 90.0, s: 0
-        fx = 97.87426995358646  # Focal length in x direction
-        fy = 97.87426995358646  # Focal length in y direction
-        cx = 160.0  # Principal point x coordinate
-        cy = 90.0  # Principal point y coordinate
-
         # Retrieve the depth value of the current pixel
         depth = depth_image[original_center_y, original_center_x]
 
-        # Calculate the x, y, and z coordinates based on the depth value and camera intrinsics
+        # x,z is the real 2D position of the car (as (x,y) coordinate) ; y is just the height of the car
         z = depth
-        x = (original_center_x - cx) * z / fx
-        y = (original_center_y - cy) * z / fy
+        x = z*29/120
+        y = z/60
 
         # Create a Point message with the x, y, and z coordinates
         point_msg = Point()
@@ -85,7 +79,7 @@ def depth_callback(depth_msg):
 
         # Publish the Point message
         point_publisher.publish(point_msg)
-        #print("Pixel 3D position", x, y, z)
+        print("Pixel 3D position", x, y, z)
         
     except CvBridgeError as e:
         rospy.logerr("CvBridge Error: {0}".format(e))
@@ -96,7 +90,7 @@ def depth_callback(depth_msg):
 rospy.init_node("cars_detection")
 
 # Create a publisher to publish the received messages
-point_publisher = rospy.Publisher("position_of_cars", Point, queue_size=10)
+point_publisher = rospy.Publisher("position_of_cars", Point, queue_size=5)
 
 # Subscribe to the segmentation, RGB, and depth image topics
 segmentation_topic = "/unity_ros/OurCar/Sensors/SemanticCamera/image_raw"
