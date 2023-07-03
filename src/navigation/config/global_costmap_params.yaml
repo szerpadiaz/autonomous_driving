@@ -4,3 +4,7 @@ global_costmap:
     update_frequency: 5.0
     static_map: true
     map_topic: "projected_map_2"
+    width: 350
+    height: 350
+    rolling_window: false
+
