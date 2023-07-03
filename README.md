@@ -32,8 +32,9 @@ sudo apt-get install python3-rosdep
 sudo rosdep init
 rosdep update
 rosdep install --from-paths src --ignore-src -r -y
-
+source /opt/ros/noetic/setup.bash
 catkin build
+source devel/setup.bash
 ```
 - Download the Unity Environment: https://syncandshare.lrz.de/getlink/fiEg9ocZ6Pc5iuEa4QqN1b/
 - Unzip the Unity file and copy the files to .../devel/lib/simulation/
