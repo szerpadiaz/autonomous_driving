@@ -1,0 +1,8 @@
+<launch>
+    <!-- Controller Node -->
+    <node name="controller_node" pkg="controller_pkg" type="controller_node" output="screen">
+        <param name="current_state_topic" value="current_state_est" />
+        <param name="car_commands_topic" value="car_commands" />
+        <param name="loop_frequency" value="1000.0" />
+    </node>
+</launch>
