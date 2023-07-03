@@ -67,6 +67,7 @@
   <exec_depend>nav_core</exec_depend>
   <exec_depend>rotate_recovery</exec_depend>
   <exec_depend>voxel_grid</exec_depend>
+  <exec_depend>move_base</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

@@ -55,7 +55,13 @@
   <build_export_depend>std_msgs</build_export_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
-  <depend>python-pcl</depend>
+  <build_depend>python-pcl</build_depend>
+  <exec_depend>python-pcl</exec_depend>
+  <build_depend>pcl_msgs</build_depend>
+  <exec_depend>pcl_msgs</exec_depend>
+
+  <build_depend>pcl</build_depend>
+  <exec_depend>pcl</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

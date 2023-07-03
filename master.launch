@@ -1,11 +1,18 @@
 <?xml version="1.0"?>
 <launch>
-  <!-- simulation -->
+  <!-- Simulation -->
   <include file="$(find simulation)/launch/simulation.launch"/>  
 
   <!-- Perception -->
   <include file="$(find perception_pkg)/launch/perception.launch"/>  
  
+  <!-- Navigation -->
+
+  <!-- Object detection -->
+  <!-- <node pkg="object_detection_pkg" type="cars_detection.py" name="cars_detection" output="screen"> </node> -->
+  <!-- <node pkg="object_detection_pkg" type="traffic_light_color.py" name="traffic_light_color" output="screen"> </node> -->
+  <!-- <node pkg="object_detection_pkg" type="traffic_light_depth_position.py" name="traffic_light_depth_position" output="screen"> </node> -->
+
   <!-- Navigation -->
   <include file="$(find navigation)/launch/move_base.launch"/>  
 
@@ -16,7 +23,8 @@
   <include file="$(find simple_navigation_goals)/launch/movebase_seq.launch"/>  
 
   <!-- RVIZ -->
-  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find perception_pkg)/cfg/master_visualization.rviz"/>
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find simulation)/../../master_visualization.rviz"/>
+ 
  
  
 </launch>
