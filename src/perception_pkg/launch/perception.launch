@@ -57,7 +57,9 @@
     <!-- Whether topics are published latched -->
     <param name="latch" value="false" />
 </node>
- 
+
+<node pkg="perception_pkg" type="localization_node" name="localization_node" output="screen"> </node>
+
 <node pkg="perception_pkg" type="global_mapping_node" name="global_mapping_node" output="screen"> </node>
 
 <node pkg="perception_pkg" type="global_mapping_2Dmap_node" name="global_mapping_2Dmap_node" output="screen"> </node>
