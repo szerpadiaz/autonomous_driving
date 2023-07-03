@@ -10,6 +10,7 @@ sudo apt-get install ros-noetic-octomap-mapping
 
 sudo apt-get install ros-noetic-pcl-ros
 sudo apt-get install ros-noetic-pcl-conversions
+sudo apt-get install python3-pcl
 
 ```
 * Launch simulation and perception

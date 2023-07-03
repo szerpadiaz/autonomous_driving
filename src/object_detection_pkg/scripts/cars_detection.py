@@ -4,7 +4,8 @@ from cv_bridge import CvBridge, CvBridgeError
 import cv2
 import numpy as np
 from geometry_msgs.msg import Point
-from pcl_msgs.msg import PointCloud2 as pcl2
+
+from sensor_msgs.msg import PointCloud2 as pcl2
 import pcl
 
 original_center_x = 0
