@@ -6,9 +6,9 @@
         <node pkg="simple_navigation_goals" type="move_base_seq" name="move_base_seq" output="screen" respawn="true">
         
         <!-- Load Sequence of Points (Cartesian Coordinates wrt "map" RF, in meters) -->
-            <rosparam param="p_seq">[-63,-10,0,-50,215,0,-5,222,0,-5,123,0,-50,120,0,-50,45,0,1,-63,0]</rosparam>
+            <rosparam param="p_seq">[5,-62.9,0.40,-5,-62.9,0.40,-12.8,-62.9,0.4,-5,123,0.4,-50,120,0,-50,45,0,1,-63,0]</rosparam>
         <!-- Load Sequence of Desired Yaw Angles (no rotations around x and y axes) in degrees-->
-            <rosparam param="yea_seq">[0,0,0,0,0,0,0]</rosparam>
+            <rosparam param="yea_seq">[90,90,90,0,0,0,0]</rosparam>
 
         </node>
 

@@ -5,6 +5,8 @@
 
   <!-- Perception -->
   <include file="$(find perception_pkg)/launch/perception.launch"/>  
+ 
+  <!-- Navigation -->
 
   <!-- Object detection -->
   <!-- <node pkg="object_detection_pkg" type="cars_detection.py" name="cars_detection" output="screen"> </node> -->
@@ -14,7 +16,15 @@
   <!-- Navigation -->
   <include file="$(find navigation)/launch/move_base.launch"/>  
  
+  <!-- Odom
+  <include file="$(find odometry_pkg)/launch/odometry.launch"/>  -->
+
+   <!-- Navigation Goals-->
+  <include file="$(find simple_navigation_goals)/launch/movebase_seq.launch"/>  
+
   <!-- RVIZ -->
   <node pkg="rviz" type="rviz" name="rviz" args="-d $(find simulation)/../../master_visualization.rviz"/>
+ 
+ 
  
 </launch>
