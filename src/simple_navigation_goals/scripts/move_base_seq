@@ -58,7 +58,6 @@ class MoveBaseSeq():
                     rospy.loginfo("Goal pose "+str(i+1)+" was preempted")
                 else:
                     rospy.loginfo("Goal pose "+str(i+1)+" failed")
-                rospy.sleep(5)
             else:
                 rospy.logerr("Action server not available!")
                 rospy.signal_shutdown("Action server not available!")
