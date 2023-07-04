@@ -4,9 +4,8 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /2D map (without dilation)1/Status1
-        - /Path1/Status1
-        - /Current state est1/Status1
+        - /Local cost map1
+        - /Axes1
       Splitter Ratio: 0.47079038619995117
     Tree Height: 563
   - Class: rviz/Selection
@@ -26,7 +25,7 @@ Panels:
   - Class: rviz/Time
     Name: Time
     SyncMode: 0
-    SyncSource: Depth cam
+    SyncSource: ""
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -63,13 +62,13 @@ Visualization Manager:
       Value: true
     - Alpha: 1
       Class: rviz/Axes
-      Enabled: false
+      Enabled: true
       Length: 7
       Name: Car frame
       Radius: 0.10000000149011612
       Reference Frame: true_body
       Show Trail: false
-      Value: false
+      Value: true
     - Alpha: 1
       Class: rviz/Polygon
       Color: 115; 210; 22
@@ -80,26 +79,12 @@ Visualization Manager:
       Unreliable: false
       Value: true
     - Class: rviz/TF
-      Enabled: true
+      Enabled: false
       Filter (blacklist): ""
       Filter (whitelist): ""
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        OurCar/Sensors/DepthCamera:
-          Value: true
-        OurCar/Sensors/RGBCameraLeft:
-          Value: true
-        OurCar/Sensors/SemanticCamera:
-          Value: true
-        camera:
-          Value: true
-        depth_camera:
-          Value: true
-        true_body:
-          Value: true
-        world:
-          Value: true
       Marker Alpha: 1
       Marker Scale: 1
       Name: TF
@@ -107,20 +92,11 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        world:
-          true_body:
-            camera:
-              OurCar/Sensors/RGBCameraLeft:
-                {}
-              OurCar/Sensors/SemanticCamera:
-                {}
-            depth_camera:
-              OurCar/Sensors/DepthCamera:
-                {}
+        {}
       Update Interval: 0
-      Value: true
+      Value: false
     - Class: rviz/Camera
-      Enabled: true
+      Enabled: false
       Image Rendering: background and overlay
       Image Topic: /unity_ros/OurCar/Sensors/DepthCamera/image_raw
       Name: Depth cam
@@ -128,11 +104,12 @@ Visualization Manager:
       Queue Size: 2
       Transport Hint: raw
       Unreliable: false
-      Value: true
+      Value: false
       Visibility:
         2D map (dilated): true
         2D map (without dilation): true
         3D map (voxel-grid): true
+        Axes: true
         Car footprint: true
         Car frame: true
         Current goal: true
@@ -241,9 +218,19 @@ Visualization Manager:
       Class: rviz/Map
       Color Scheme: costmap
       Draw Behind: false
-      Enabled: true
+      Enabled: false
       Name: Global cost map
       Topic: /move_base/global_costmap/costmap
+      Unreliable: false
+      Use Timestamp: false
+      Value: false
+    - Alpha: 0.699999988079071
+      Class: rviz/Map
+      Color Scheme: costmap
+      Draw Behind: false
+      Enabled: true
+      Name: Local cost map
+      Topic: /move_base/local_costmap/costmap
       Unreliable: false
       Use Timestamp: false
       Value: true
@@ -386,6 +373,15 @@ Visualization Manager:
       Topic: /current_state_est
       Unreliable: false
       Value: true
+    - Alpha: 1
+      Class: rviz/Axes
+      Enabled: true
+      Length: 1
+      Name: Axes
+      Radius: 0.10000000149011612
+      Reference Frame: map
+      Show Trail: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -414,7 +410,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 140.02467346191406
+      Distance: 243.68557739257812
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -432,7 +428,7 @@ Visualization Manager:
       Near Clip Distance: 0.009999999776482582
       Pitch: 1.5697963237762451
       Target Frame: <Fixed Frame>
-      Yaw: 6.272587776184082
+      Yaw: 6.282608509063721
     Saved: ~
 Window Geometry:
   Depth cam:
