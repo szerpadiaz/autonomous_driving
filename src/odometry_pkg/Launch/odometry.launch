@@ -1,4 +1,0 @@
-<launch>
-  <!-- Run the odometry.py script -->
-  <node name="odometry" pkg="odometry_pkg" type="odometry.py" output="screen"/>
-</launch>

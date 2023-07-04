@@ -9,4 +9,4 @@ TrajectoryPlannerROS:
     acc_lim_y: 2.5
   
     holonomic_robot: false
-    global_frame_id: odom
+    global_frame_id: world
