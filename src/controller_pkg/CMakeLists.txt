@@ -30,6 +30,9 @@ catkin_package(CATKIN_DEPENDS
   eigen_conversions
   tf_conversions
 )
+catkin_install_python(PROGRAMS scripts/state_machine.py
+DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 find_package(Eigen3)
 
