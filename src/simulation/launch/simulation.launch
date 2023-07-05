@@ -65,8 +65,5 @@
 
   <node pkg="tf2_ros" type="static_transform_publisher"
         name="depth_camera_to_body"      args="0 0 0 0 0 0 /true_body /depth_camera" />
-  <node name="cars_detection_node" pkg="object_detection_pkg" type="cars_detection.py" />
-  <node name="traffic_light_color_node" pkg="object_detection_pkg" type="traffic_light_color.py" />
-  <node name="traffic_light_position_node" pkg="object_detection_pkg" type="traffic_light_depth_position.py" />
 
 </launch>
