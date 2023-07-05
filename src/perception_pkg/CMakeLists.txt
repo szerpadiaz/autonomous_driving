@@ -58,3 +58,7 @@ target_link_libraries(global_mapping_node ${PCL_COMMON_LIBRARIES}  ${PCL_LIBRARI
 add_executable(global_mapping_2Dmap_node src/global_mapping_2Dmap_node.cpp)
 add_dependencies(global_mapping_2Dmap_node ${catkin_EXPORTED_TARGETS})
 target_link_libraries(global_mapping_2Dmap_node ${catkin_LIBRARIES} ${OpenCV_LIBS})
+
+add_executable(localization_node src/localization.cpp)
+add_dependencies(localization_node ${catkin_EXPORTED_TARGETS})
+target_link_libraries(localization_node ${catkin_LIBRARIES})

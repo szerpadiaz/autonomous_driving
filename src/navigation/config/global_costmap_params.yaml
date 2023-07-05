@@ -2,9 +2,24 @@ global_costmap:
     global_frame: world
     robot_base_frame: true_body
     update_frequency: 50.0
-    static_map: true
-    map_topic: "projected_map_2"
+    rolling_window: false
     width: 350
     height: 350
-    rolling_window: false
+    resolution: 1.0
 
+    plugins: 
+    - {name: static_layer, type: "costmap_2d::StaticLayer"}
+    - {name: inflation_layer, type: "costmap_2d::InflationLayer"}
+    - {name: obstacle_layer, type: "costmap_2d::ObstacleLayer"}
+
+    static_layer:
+        enabled: true
+        map_topic: "projected_map_2"
+
+    inflation_layer:
+        enabled: true
+        cost_scaling_factor: 5
+        inflation_radius: 1.0
+
+    obstacle_layer:
+        enabled: false

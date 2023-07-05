@@ -1,4 +1,8 @@
 <launch>
+
+<!-- Localization -->
+<node pkg="perception_pkg" type="localization_node" name="localization_node" output="screen"> </node>
+
 <!-- Perception: point cloud generation using depth_image_proc-->
   <node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager" />
   <node pkg="nodelet" type="nodelet"
@@ -9,6 +13,9 @@
     <remap from="points" to="points_cloud"/>
     <param name="queue_size" value="10" />
   </node>
+
+<!-- Node that filters the point-cloud -->
+<node pkg="perception_pkg" type="global_mapping_node" name="global_mapping_node" output="screen"> </node>
 
 <!-- Octomap Server -->
 <node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
@@ -57,9 +64,8 @@
     <!-- Whether topics are published latched -->
     <param name="latch" value="false" />
 </node>
- 
-<node pkg="perception_pkg" type="global_mapping_node" name="global_mapping_node" output="screen"> </node>
 
+<!-- Post processing the 2D map-->
 <node pkg="perception_pkg" type="global_mapping_2Dmap_node" name="global_mapping_2Dmap_node" output="screen"> </node>
 
 </launch>
