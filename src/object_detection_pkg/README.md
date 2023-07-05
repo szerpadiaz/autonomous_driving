@@ -1,6 +1,8 @@
 # Object_detection_pkg
 
 library : sudo apt-get install python3-pcl
+	sudo apt-get install python-opencv
+
 
 run the nodes with to see the result (roscore first):
 -	rosrun object_detection_pkg cars_detection.py

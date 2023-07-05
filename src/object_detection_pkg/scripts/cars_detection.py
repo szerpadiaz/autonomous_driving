@@ -90,10 +90,12 @@ def depth_callback(depth_msg):
         depth = depth_image[original_center_y, original_center_x]
 
         # x,z is the real 2D position of the car (as (x,y) coordinate) ; y is just the height of the car
-        z = depth
+        # z = depth
+        # x = z*29/120
+        # y = z/60
+        y = depth
         x = z*29/120
-        y = z/60
-
+        z = z/60
         # Create a Point message with the x, y, and z coordinates
         point_msg = Point()
         point_msg.x = x
@@ -120,9 +122,12 @@ def convert_contours_to_points(contours, depth_image):
             y = int(y * 240 / new_height)
             
             depth = depth_image[y, x]
-            z_3d = depth
-            x_3d = z_3d * 29 / 120
-            y_3d = z_3d / 60
+            # z_3d = depth
+            # x_3d = z_3d * 29 / 120
+            # y_3d = z_3d / 60
+            x_3d = depth * 29 / 120
+            y_3d=depth
+            z_3d=depth/60
             points.append([x_3d, y_3d, z_3d])
     return points
 

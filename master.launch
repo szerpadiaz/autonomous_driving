@@ -9,9 +9,9 @@
   <!-- Navigation -->
 
   <!-- Object detection -->
-  <!-- <node pkg="object_detection_pkg" type="cars_detection.py" name="cars_detection" output="screen"> </node> -->
-  <!-- <node pkg="object_detection_pkg" type="traffic_light_color.py" name="traffic_light_color" output="screen"> </node> -->
-  <!-- <node pkg="object_detection_pkg" type="traffic_light_depth_position.py" name="traffic_light_depth_position" output="screen"> </node> -->
+  <node pkg="object_detection_pkg" type="cars_detection.py" name="cars_detection" output="screen"> </node>
+  <node pkg="object_detection_pkg" type="traffic_light_color.py" name="traffic_light_color" output="screen"> </node>
+  <node pkg="object_detection_pkg" type="traffic_light_depth_position.py" name="traffic_light_depth_position" output="screen"> </node>
 
   <!-- Navigation -->
   <include file="$(find navigation)/launch/move_base.launch"/>  
