@@ -94,8 +94,8 @@ def depth_callback(depth_msg):
         # x = z*29/120
         # y = z/60
         y = depth
-        x = z*29/120
-        z = z/60
+        x = y*29/120
+        z = y/60
         # Create a Point message with the x, y, and z coordinates
         point_msg = Point()
         point_msg.x = x
@@ -116,18 +116,19 @@ def convert_contours_to_points(contours, depth_image):
     # Iterate over the contours and convert each point to 3D
     for contour in contours:
         for point in contour:
-            x = point[0][0]
-            y = point[0][1]
-            x = int(x * 320 / new_width)
-            y = int(y * 240 / new_height)
-            
+            x = int(point[0][0] * 320 / new_width)
+            y = int(point[0][1] * 240 / new_height)
             depth = depth_image[y, x]
-            # z_3d = depth
-            # x_3d = z_3d * 29 / 120
-            # y_3d = z_3d / 60
-            x_3d = depth * 29 / 120
-            y_3d=depth
-            z_3d=depth/60
+
+            x_3d = x/100
+            y_3d= depth/1000
+            z_3d= y/100
+
+            #x_3d = depth * 29 / 120
+            #y_3d= depth
+            #z_3d= depth/60
+
+            #print("Point: ", x_3d, y_3d, z_3d)    
             points.append([x_3d, y_3d, z_3d])
     return points
 
