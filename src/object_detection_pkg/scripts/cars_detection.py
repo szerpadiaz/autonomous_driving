@@ -116,17 +116,30 @@ def convert_contours_to_points(contours, depth_image):
     # Iterate over the contours and convert each point to 3D
     for contour in contours:
         for point in contour:
-            x = int(point[0][0] * 320 / new_width)
-            y = int(point[0][1] * 240 / new_height)
-            depth = depth_image[y, x]
+            u = int(point[0][0] * 320 / new_width)
+            v = int(point[0][1] * 240 / new_height)
+            depth = depth_image[v, u]
 
-            x_3d = (depth * 29 / 120) / 1000
-            y_3d= depth / 1000
-            z_3d= (depth/60) / 1000
+            # convert from pixel coordinates to 3d-point
+            K = np.array([[120, 0, 160],
+              [0, 120, 120],
+              [0, 0, 1]])
+            K_inv = np.linalg.inv(K)
+            uv = np.array([u, v, 1])
+            xyz =  K_inv @ uv
+            xyz *= depth
+
+            # convert from milimeters to meters
+            x = xyz[0] / 1000
+            y= xyz[1] / 1000
+            z= xyz[2] / 1000
             
-            if(x_3d != 0 or y_3d != 0 or z_3d != 0):
-                #print("Point: ", x_3d, y_3d, z_3d)    
-                points.append([x_3d, y_3d, z_3d])
+            if(x != 0 or y != 0 or z != 0):
+                max_range_m = 25
+                if(z < max_range_m):
+                    #print("Point: ", x_3d, z_3d, y_3d)    
+                    # append point ( z and y coordinates should be aligned with car frame)
+                    points.append([x, z, y])
     return points
 
 # Initialize the ROS node
