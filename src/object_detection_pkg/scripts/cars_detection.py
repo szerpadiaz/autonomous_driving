@@ -120,16 +120,13 @@ def convert_contours_to_points(contours, depth_image):
             y = int(point[0][1] * 240 / new_height)
             depth = depth_image[y, x]
 
-            x_3d = x/100
-            y_3d= depth/1000
-            z_3d= y/100
-
-            #x_3d = depth * 29 / 120
-            #y_3d= depth
-            #z_3d= depth/60
-
-            #print("Point: ", x_3d, y_3d, z_3d)    
-            points.append([x_3d, y_3d, z_3d])
+            x_3d = (depth * 29 / 120) / 1000
+            y_3d= depth / 1000
+            z_3d= (depth/60) / 1000
+            
+            if(x_3d != 0 or y_3d != 0 or z_3d != 0):
+                #print("Point: ", x_3d, y_3d, z_3d)    
+                points.append([x_3d, y_3d, z_3d])
     return points
 
 # Initialize the ROS node
