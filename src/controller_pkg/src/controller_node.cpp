@@ -11,6 +11,7 @@
 #include <math.h>
 #include <std_msgs/Float64.h>
 #include <geometry_msgs/Twist.h>
+#include <nav_msgs/Path.h>
 
 #define PI M_PI
 
@@ -29,6 +30,7 @@ class controllerNode{
   ros::Subscriber current_state;
   ros::Publisher car_commands;
   ros::Subscriber cmd_vel;
+  ros::Subscriber local_path;
 
   ros::Timer timer;
 
@@ -57,7 +59,22 @@ public:
       current_state = nh.subscribe("current_state_est", 1, &controllerNode::onCurrentState, this);
       cmd_vel = nh.subscribe("cmd_vel", 1, &controllerNode::onCmdVelocity, this);
       car_commands = nh.advertise<mav_msgs::Actuators>("car_commands", 1);
+      local_path = nh.subscribe("/move_base/TrajectoryPlannerROS/local_plan", 1, &controllerNode::onLocalPath, this);
+      
       timer = nh.createTimer(ros::Rate(hz), &controllerNode::controlLoop, this);
+  }
+
+  void onLocalPath(const nav_msgs::Path::ConstPtr& localPlan){
+    int numPoses = localPlan->poses.size();
+    //ROS_INFO("Number of poses in the local plan: %d", numPoses);
+
+    for (const auto& pose : localPlan->poses)
+    {
+      const auto& position = pose.pose.position;
+      const auto& orientation = pose.pose.orientation;
+      //ROS_INFO("Position: [x=%.2f, y=%.2f, z=%.2f]", position.x, position.y, position.z);
+      //ROS_INFO("Orientation: [x=%.2f, y=%.2f, z=%.2f, w=%.2f]", orientation.x, orientation.y, orientation.z, orientation.w);
+    }
   }
 
   void onCmdVelocity(const geometry_msgs::Twist& msg){
