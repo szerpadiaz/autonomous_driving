@@ -10,6 +10,7 @@
 #include <trajectory_msgs/MultiDOFJointTrajectoryPoint.h>
 #include <math.h>
 #include <std_msgs/Float64.h>
+#include <geometry_msgs/Twist.h>
 
 #define PI M_PI
 
@@ -27,6 +28,8 @@ class controllerNode{
 
   ros::Subscriber current_state;
   ros::Publisher car_commands;
+  ros::Subscriber cmd_vel;
+
   ros::Timer timer;
 
 
@@ -45,12 +48,26 @@ class controllerNode{
 
   double hz;             // frequency of the main control loop
 
+  float linear_vel;
+  float angular_vel;
+
 public:
   controllerNode():hz(1000.0){
       
       current_state = nh.subscribe("current_state_est", 1, &controllerNode::onCurrentState, this);
+      cmd_vel = nh.subscribe("cmd_vel", 1, &controllerNode::onCmdVelocity, this);
       car_commands = nh.advertise<mav_msgs::Actuators>("car_commands", 1);
       timer = nh.createTimer(ros::Rate(hz), &controllerNode::controlLoop, this);
+  }
+
+  void onCmdVelocity(const geometry_msgs::Twist& msg){
+    linear_vel = msg.linear.x;
+    angular_vel = msg.angular.z;
+
+    if(linear_vel < 0)
+      linear_vel *= -1;
+    //ROS_INFO("cmd_vel: linear_vel: %f, angular_vel: %f", linear_vel, angular_vel);
+
   }
 
   void onCurrentState(const nav_msgs::Odometry& cur_state){
@@ -65,6 +82,11 @@ public:
 
     // Rotate omega
     omega = R.transpose()*omega;
+
+    //ROS_INFO("Current state - position: %f, %f, %f", x[0], x[1], x[2]);
+    //ROS_INFO("Current state - velocity: %f, %f, %f", v[0], v[1], v[2]);
+  ////ROS_INFO("Current state - orientation: %f, %f, %f", R[0][0], R[1][1], R[2][2]);
+    //ROS_INFO("Current state - angular-vel: %f, %f, %f", omega[0], omega[1], omega[2]);
   }
 
 
@@ -73,8 +95,8 @@ public:
     mav_msgs::Actuators msg;
 
     msg.angular_velocities.resize(4);
-    msg.angular_velocities[0] = 0.1; // Acceleration
-    msg.angular_velocities[1] = 0;  // Turning angle
+    msg.angular_velocities[0] = linear_vel; // Acceleration
+    msg.angular_velocities[1] = 0; //angular_vel;  // Turning angle rate
     msg.angular_velocities[2] = 0;  // Breaking
     msg.angular_velocities[3] = 0;
 

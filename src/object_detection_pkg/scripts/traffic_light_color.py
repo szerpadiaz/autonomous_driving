@@ -110,15 +110,17 @@ def rgb_callback(rgb_msg):
                         cv2.imwrite("bounding_box_image_green.jpg", bounding_box_image)
 
                     # Print the dominant color
-                    print("Dominant Color:", dominant_color)
+                    # print("Dominant Color:", dominant_color)
                     # Publish the dominant color as a String message
                     color_msg = String()
                     color_msg.data = dominant_color
                     pub.publish(color_msg)
                 else:
-                    print("No contour with area greater than 50 found.")
+                    pass
+                    # print("No contour with area greater than 50 found.")
             else:
-                print("No contours found.")
+                pass
+                # print("No contours found.")
 
     except CvBridgeError as e:
         rospy.logerr("CvBridge Error: {0}".format(e))

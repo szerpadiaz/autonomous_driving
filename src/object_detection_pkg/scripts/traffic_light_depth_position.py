@@ -90,7 +90,7 @@ def depth_callback(depth_msg):
                     original_center_y = int(center_y * 240 / new_height)
 
                     depth = depth_image[original_center_y, original_center_x]
-                    print("depth:", depth)
+                    # print("depth:", depth)
 
                     # Publish the depth value
                     depth_publisher.publish(depth)

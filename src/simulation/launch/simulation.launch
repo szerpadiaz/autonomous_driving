@@ -40,11 +40,6 @@
 
   <node name="w_to_unity" pkg="simulation" type="w_to_unity"/>
 
- <!-- <node pkg="tf2_ros" type="static_transform_publisher"
-        name="sim_true_body"      args="0 0 0 0 0 0 /OurCar/Sensors/TrueState /true_body" /> -->
-        
-<!--   <node pkg="tf2_ros" type="static_transform_publisher"
-        name="sim_true_body"      args="0 0 0 0 0 0 /OurCar/Sensors/TrueState /true_body" /> -->
   <node pkg="tf2_ros" type="static_transform_publisher"
         name="sim_rgb_camera"      args="0 0 0 0 0 0 /camera /OurCar/Sensors/RGBCameraLeft " />
 

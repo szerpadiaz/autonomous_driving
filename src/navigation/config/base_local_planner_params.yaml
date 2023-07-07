@@ -1,20 +1,18 @@
 TrajectoryPlannerROS:
-    max_vel_x: 0.45
-    min_vel_x: 0.1
-    max_vel_y: 0.45
-    min_vel_y: 0.1
-    max_vel_z: 0.0
-    min_vel_z: 0.0
-    max_vel_theta: 1.0
-    min_in_place_vel_theta: 0.4
-  
-    acc_lim_theta: 3.2
-    acc_lim_x: 2.5
-    acc_lim_y: 2.5
-  
-    xy_goal_tolerance: 1.0
-    z_goal_tolerance: 1.0
-    yaw_goal_tolerance: 6.28  # 2*pi to indirectly disable the yaw angle check
+  max_vel_x: 3.0               # Maximum forward velocity (around 10 km/h)
+  min_vel_x: 0.1               # Minimum forward velocity (to overcome friction)
+  max_vel_y: 0.0               # Maximum lateral velocity (no lateral movement)
+  min_vel_y: 0.0               # Minimum lateral velocity (no lateral movement)
+  max_vel_theta: 1.0           # Maximum rotational velocity (turning speed in rad/s)
+  min_in_place_vel_theta: 0.4  # Minimum rotational velocity during in-place rotations (for precise maneuvering)
 
-    holonomic_robot: false
-    global_frame_id: world
+  acc_lim_theta: 3.2  # Maximum rotational acceleration (for smooth and controlled turns)
+  acc_lim_x: 2.5      # Maximum forward acceleration
+  acc_lim_y: 0.0      # Maximum lateral acceleration (no lateral movement)
+
+  xy_goal_tolerance: 1.0    # Tolerance for goal proximity in x and y axes
+  z_goal_tolerance: 1.0     # Tolerance for goal proximity in the z axis (elevation)
+  yaw_goal_tolerance: 6.28  # Tolerance for goal proximity in yaw angle (2*pi to indirectly disable the check)
+
+  holonomic_robot: false  # Set to true if the robot has holonomic capabilities
+  global_frame_id: world  # The frame ID used as the global reference frame
