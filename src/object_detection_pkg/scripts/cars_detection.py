@@ -4,7 +4,7 @@ from cv_bridge import CvBridge, CvBridgeError
 import cv2
 import numpy as np
 from geometry_msgs.msg import Point
-import pcl
+
 from std_msgs.msg import Header
 import pcl_ros
 from collections import namedtuple
