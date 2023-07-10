@@ -3,17 +3,39 @@ import rospy
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseStamped, TwistStamped, Vector3, Quaternion
 
+import numpy as np
+from geometry_msgs.msg import Quaternion
+import tf
+
 def pose_callback(pose_msg_stamped):
     # Process the received PoseStamped message and update the Odometry message
     pose_msg = pose_msg_stamped.pose
     odom_msg.pose.pose.position = pose_msg.position
     odom_msg.pose.pose.orientation = pose_msg.orientation
 
+
+# Convert Quaternion message to Eigen::Quaterniond
+def quaternion_msg_to_euler(quaternion_msg):
+    quaternion = [quaternion_msg.x, quaternion_msg.y, quaternion_msg.z, quaternion_msg.w]
+    euler = tf.transformations.euler_from_quaternion(quaternion)
+    return euler
+
 def twist_callback(twist_msg_stamped):
     # Process the received TwistStamped message and update the Odometry message
     twist_msg = twist_msg_stamped.twist
     odom_msg.twist.twist.linear = twist_msg.linear
-    odom_msg.twist.twist.angular = twist_msg.angular
+
+    #euler = quaternion_msg_to_euler(odom_msg.pose.pose.orientation)
+    #R = tf.transformations.euler_matrix(euler[0], euler[1], euler[2])
+    #angular_vel = np.array([twist_msg.angular.x, twist_msg.angular.y, twist_msg.angular.z])
+    #rotated_angular_vel =  np.dot(R[:3, :3].transpose(), angular_vel)
+    #odom_msg.twist.twist.angular.x = rotated_angular_vel[0]
+    #odom_msg.twist.twist.angular.y = rotated_angular_vel[1]
+    #odom_msg.twist.twist.angular.z = rotated_angular_vel[2]
+    
+    odom_msg.twist.twist.angular.x = twist_msg.angular.x
+    odom_msg.twist.twist.angular.y = twist_msg.angular.y
+    odom_msg.twist.twist.angular.z = twist_msg.angular.z
 
 if __name__ == '__main__':
     rospy.init_node('odometry_publisher')
@@ -25,14 +47,14 @@ if __name__ == '__main__':
     odom_msg = Odometry()
 
     # Set the frame ID
-    odom_msg.header.frame_id = 'true_body'
+    odom_msg.header.frame_id = 'odom'
 
     # Set the child frame ID
-    odom_msg.child_frame_id = 'world'
+    odom_msg.child_frame_id = 'true_body'
 
     # Create subscribers for the PoseStamped and TwistStamped topics
-    rospy.Subscriber('/unity_ros/OurCar/Sensors/IMU/pose', PoseStamped, pose_callback)
-    rospy.Subscriber('/unity_ros/OurCar/Sensors/IMU/twist', TwistStamped, twist_callback)
+    rospy.Subscriber('/true_pose', PoseStamped, pose_callback)
+    rospy.Subscriber('/true_twist', TwistStamped, twist_callback)
 
     rate = rospy.Rate(1000)  # Publish at 10 Hz
 

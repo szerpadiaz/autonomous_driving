@@ -79,6 +79,13 @@ public:
 
   void onCmdVelocity(const geometry_msgs::Twist& msg){
     linear_vel = msg.linear.x;
+    
+    //Eigen::Vector3d omega_vector;
+    //omega_vector[0] = msg.angular.x;
+    //omega_vector[1] = msg.angular.y;
+    //omega_vector[2] = msg.angular.z;
+    //auto desired_omega = R.transpose() * omega_vector;
+    //angular_vel = desired_omega[2];
     angular_vel = msg.angular.z;
 
     if(linear_vel < 0)
