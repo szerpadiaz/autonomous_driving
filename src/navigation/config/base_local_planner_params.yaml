@@ -10,9 +10,10 @@ TrajectoryPlannerROS:
   acc_lim_x: 2.5      # Maximum forward acceleration
   acc_lim_y: 0.0      # Maximum lateral acceleration (no lateral movement)
 
-  xy_goal_tolerance: 1.0    # Tolerance for goal proximity in x and y axes
-  z_goal_tolerance: 1.0     # Tolerance for goal proximity in the z axis (elevation)
+  xy_goal_tolerance: 2.0    # Tolerance for goal proximity in x and y axes
+  z_goal_tolerance: 2.0     # Tolerance for goal proximity in the z axis (elevation)
   yaw_goal_tolerance: 6.28  # Tolerance for goal proximity in yaw angle (2*pi to indirectly disable the check)
 
   holonomic_robot: false  # Set to true if the robot has holonomic capabilities
   global_frame_id: world  # The frame ID used as the global reference frame
+  sim_time: 5

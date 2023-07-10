@@ -1,6 +1,6 @@
 global_costmap:
     global_frame: world
-    robot_base_frame: true_body
+    robot_base_frame: base_link
     update_frequency: 5.0
     rolling_window: false
     width: 350

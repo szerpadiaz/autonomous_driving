@@ -47,10 +47,10 @@ if __name__ == '__main__':
     odom_msg = Odometry()
 
     # Set the frame ID
-    odom_msg.header.frame_id = 'odom'
+    odom_msg.header.frame_id = 'true_body'
 
     # Set the child frame ID
-    odom_msg.child_frame_id = 'true_body'
+    odom_msg.child_frame_id = 'world'
 
     # Create subscribers for the PoseStamped and TwistStamped topics
     rospy.Subscriber('/true_pose', PoseStamped, pose_callback)

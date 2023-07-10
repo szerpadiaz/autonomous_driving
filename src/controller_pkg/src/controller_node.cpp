@@ -119,8 +119,8 @@ public:
     mav_msgs::Actuators msg;
 
     msg.angular_velocities.resize(4);
-    msg.angular_velocities[0] = linear_vel; // Acceleration
-    msg.angular_velocities[1] = 0; //angular_vel;  // Turning angle rate
+    msg.angular_velocities[0] = 0; //linear_vel; // Acceleration
+    msg.angular_velocities[1] = 0;  // Turning angle rate
     msg.angular_velocities[2] = 0;  // Breaking
     msg.angular_velocities[3] = 0;
 

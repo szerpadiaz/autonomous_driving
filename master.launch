@@ -18,7 +18,7 @@
   <include file="$(find odometry_pkg)/launch/odometry.launch"/>  
 
    <!-- Navigation Goals-->
-  <include file="$(find simple_navigation_goals)/launch/movebase_seq.launch"/>  
+  <!-- <include file="$(find simple_navigation_goals)/launch/movebase_seq.launch"/> -->
 
    <!-- Controller -->
   <include file="$(find controller_pkg)/launch/controller_pkg.launch"/>

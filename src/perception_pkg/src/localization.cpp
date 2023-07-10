@@ -12,7 +12,6 @@
 class Localization{
     private:
         ros::NodeHandle nh;
-        tf::Transform map_to_world_transform;
         tf::StampedTransform  base_link_to_world_transform;
 
         float current_x , current_y, current_z;
@@ -24,22 +23,6 @@ class Localization{
         Localization(){
             // Setting the map reference frame with respect to the world
             get_base_link_to_world_transform();
-
-            map_to_world_transform.setOrigin(base_link_to_world_transform.getOrigin());
-            map_to_world_transform.setRotation(base_link_to_world_transform.getRotation());
-
-            ROS_INFO("map_to_world_transform broadcasted ");
-            ROS_INFO("Translation: (%f, %f, %f)",
-                    map_to_world_transform.getOrigin().getX(),
-                    map_to_world_transform.getOrigin().getY(),
-                    map_to_world_transform.getOrigin().getZ());
-            ROS_INFO("Rotation: (%f, %f, %f, %f)",
-                    map_to_world_transform.getRotation().getX(),
-                    map_to_world_transform.getRotation().getY(),
-                    map_to_world_transform.getRotation().getZ(),
-                    map_to_world_transform.getRotation().getW());
-
-            publish_map_to_world_transform();
         }
 
         void get_base_link_to_world_transform(){
@@ -48,17 +31,21 @@ class Localization{
                 tf_listener.waitForTransform("true_body", "world", ros::Time(0), ros::Duration(5.0));
                 tf_listener.lookupTransform("true_body", "world", ros::Time(0), base_link_to_world_transform);
 
-                // Normalize the quaternion
-                base_link_to_world_transform.setRotation(base_link_to_world_transform.getRotation().normalized());
+                tf::Transform rotation_transform;
+                rotation_transform.setRotation(tf::Quaternion(0, 0, -M_PI / 2.0));
+
+                // Apply the rotation to the original transform
+                tf::Transform rotated_transform = rotation_transform * base_link_to_world_transform;
+
+                base_link_to_world_transform.setRotation(rotated_transform.getRotation());
+                base_link_to_world_transform.setOrigin(rotated_transform.getOrigin());
+
+                static tf::TransformBroadcaster tf_broadcaster;
+                tf_broadcaster.sendTransform(tf::StampedTransform(base_link_to_world_transform, ros::Time::now(), "base_link", "world"));
 
             } catch (tf::TransformException& ex) {
                 ROS_ERROR("Failed to look up the base_link_to_world_transform %s", ex.what());
             }
-        }
-
-        void publish_map_to_world_transform(){
-            static tf::TransformBroadcaster tf_broadcaster;
-            tf_broadcaster.sendTransform(tf::StampedTransform(map_to_world_transform, ros::Time::now(), "map", "world"));
         }
 
         void update_transforms()
@@ -67,12 +54,10 @@ class Localization{
 
             while (ros::ok())
             {
-                tf::StampedTransform true_body_to_world;
                 try
                 {
                     // Re-publishing the map fixed reference frame (every time base_link changes)
                     get_base_link_to_world_transform();
-                    publish_map_to_world_transform();
                 }
                 catch (tf::TransformException& ex)
                 {
