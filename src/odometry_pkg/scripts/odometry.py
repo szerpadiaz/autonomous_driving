@@ -24,9 +24,9 @@ def quaternion_msg_to_euler(quaternion_msg):
 def twist_callback(twist_msg_stamped):
     # Process the received TwistStamped message and update the Odometry message
     twist_msg = twist_msg_stamped.twist
-    odom_msg.twist.twist.linear.x = -1.0 * twist_msg.linear.x
-    odom_msg.twist.twist.linear.y = -1.0 * twist_msg.linear.y
-    odom_msg.twist.twist.linear.z = 1.0 * twist_msg.linear.z
+    #odom_msg.twist.twist.linear.x = -1.0 * twist_msg.linear.x
+    #odom_msg.twist.twist.linear.y = -1.0 * twist_msg.linear.y
+    #odom_msg.twist.twist.linear.z = 1.0 * twist_msg.linear.z
 
     #euler = quaternion_msg_to_euler(odom_msg.pose.pose.orientation)
     #R = tf.transformations.euler_matrix(euler[0], euler[1], euler[2])
@@ -39,6 +39,7 @@ def twist_callback(twist_msg_stamped):
     odom_msg.twist.twist.linear.y = 0
     odom_msg.twist.twist.linear.z = 0
     
+    # This must be corrected! It is just a cheap trick. Markus Ryll
     odom_msg.twist.twist.angular.x = 0 #twist_msg.angular.x
     odom_msg.twist.twist.angular.y = 0 #twist_msg.angular.y
     odom_msg.twist.twist.angular.z = 0 #twist_msg.angular.z

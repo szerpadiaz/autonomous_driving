@@ -89,10 +89,6 @@ public:
     //angular_vel = desired_omega[2];
     angular_vel = msg.angular.z;
 
-    if(linear_vel < 0)
-      linear_vel *= -1;
-    //ROS_INFO("cmd_vel: linear_vel_x: %f, linear_vel_y: %f, linear_vel_z %f", msg.linear.x, msg.linear.y, msg.linear.z);
-
   }
 
   void onCurrentState(const nav_msgs::Odometry& cur_state){
@@ -112,15 +108,7 @@ public:
     if (omega_control < -3){
       omega_control = -3;}
     if (omega_control > 3){
-      omega_control = 3;}
-      
-    
-    
-
-    ROS_INFO("Stuff: omega_control %f, angular_vel %f, omega %f", omega_control, angular_vel, omega[2]);
-    //ROS_INFO("Current state - velocity: %f, %f, %f", v[0], v[1], v[2]);
-  ////ROS_INFO("Current state - orientation: %f, %f, %f", R[0][0], R[1][1], R[2][2]);
-    //ROS_INFO("Current state - angular-vel: %f, %f, %f", omega[0], omega[1], omega[2]);
+      omega_control = 3;}   
   }
 
 
@@ -128,10 +116,6 @@ public:
 
     mav_msgs::Actuators msg;
 
-    if (linear_vel < 1.1)
-      {linear_vel = 1.1;}
-    if (linear_vel > 3.0)
-      {linear_vel = 3.0;}
     msg.angular_velocities.resize(4);
     msg.angular_velocities[0] = 4 - v(0); // Acceleration
     msg.angular_velocities[1] = omega_control;  // Turning angle rate
