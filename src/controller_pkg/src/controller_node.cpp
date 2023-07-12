@@ -41,6 +41,7 @@ class controllerNode{
   Eigen::Vector3d v;     // current velocity of the UAV's c.o.m. in the world frame
   Eigen::Matrix3d R;     // current orientation of the UAV
   Eigen::Vector3d omega; // current angular velocity of the UAV's c.o.m. in the *body* frame
+  float omega_control;
 
   // Desired state
   Eigen::Vector3d xd;    // desired position of the UAV's c.o.m. in the world frame
@@ -54,7 +55,7 @@ class controllerNode{
   float angular_vel;
 
 public:
-  controllerNode():hz(1000.0){
+  controllerNode():hz(50.0){
       
       current_state = nh.subscribe("current_state_est", 1, &controllerNode::onCurrentState, this);
       cmd_vel = nh.subscribe("cmd_vel", 1, &controllerNode::onCmdVelocity, this);
@@ -90,7 +91,7 @@ public:
 
     if(linear_vel < 0)
       linear_vel *= -1;
-    //ROS_INFO("cmd_vel: linear_vel: %f, angular_vel: %f", linear_vel, angular_vel);
+    //ROS_INFO("cmd_vel: linear_vel_x: %f, linear_vel_y: %f, linear_vel_z %f", msg.linear.x, msg.linear.y, msg.linear.z);
 
   }
 
@@ -105,9 +106,18 @@ public:
 
 
     // Rotate omega
-    omega = R.transpose()*omega;
+    omega = R.transpose() * omega;
+    v = R.transpose() * v;
+    omega_control  = (-angular_vel);
+    if (omega_control < -3){
+      omega_control = -3;}
+    if (omega_control > 3){
+      omega_control = 3;}
+      
+    
+    
 
-    //ROS_INFO("Current state - position: %f, %f, %f", x[0], x[1], x[2]);
+    ROS_INFO("Stuff: omega_control %f, angular_vel %f, omega %f", omega_control, angular_vel, omega[2]);
     //ROS_INFO("Current state - velocity: %f, %f, %f", v[0], v[1], v[2]);
   ////ROS_INFO("Current state - orientation: %f, %f, %f", R[0][0], R[1][1], R[2][2]);
     //ROS_INFO("Current state - angular-vel: %f, %f, %f", omega[0], omega[1], omega[2]);
@@ -118,11 +128,17 @@ public:
 
     mav_msgs::Actuators msg;
 
+    if (linear_vel < 1.1)
+      {linear_vel = 1.1;}
+    if (linear_vel > 3.0)
+      {linear_vel = 3.0;}
     msg.angular_velocities.resize(4);
-    msg.angular_velocities[0] = linear_vel; // Acceleration
-    msg.angular_velocities[1] = 0; //angular_vel;  // Turning angle rate
+    msg.angular_velocities[0] = 4 - v(0); // Acceleration
+    msg.angular_velocities[1] = omega_control;  // Turning angle rate
     msg.angular_velocities[2] = 0;  // Breaking
     msg.angular_velocities[3] = 0;
+    
+    //ROS_INFO("cmd_vel: linear_vel: %f, angular_vel: %f", linear_vel, omega_control);
 
     car_commands.publish(msg);
 

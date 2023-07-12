@@ -7,8 +7,14 @@
 #include <geometry_msgs/TwistStamped.h>
 #include <geometry_msgs/TransformStamped.h>
 #include "unity_stream_parser.h"
+#include <cmath>
 
 class TrueStateParser : public UnityStreamParser {
+
+struct Quaternion {
+    double w, x, y, z;
+};
+
 public:
   TrueStateParser() : nh_("~") { };
 
@@ -17,8 +23,16 @@ public:
                             double time_offset) override {
     float px, py, pz;
     float qw, qx, qy, qz;
+    float qw2, qx2, qy2, qz2;
     float vx, vy, vz;
     float rx, ry, rz;
+    
+    Quaternion rotationQuaternion;
+    
+    rotationQuaternion.w = std::sqrt(2) / 2;
+    rotationQuaternion.x = 0;
+    rotationQuaternion.y = 0;
+    rotationQuaternion.z = std::sqrt(2) / 2;
 
     px = stream_reader.ReadFloat();
     py = stream_reader.ReadFloat();
@@ -28,6 +42,23 @@ public:
     qy = stream_reader.ReadFloat();
     qz = stream_reader.ReadFloat();
     qw = stream_reader.ReadFloat();
+    
+    qx2 = -qx;
+    qy2 = -qz;
+    qz2 = -qy;
+    qw2 = qw;
+    
+    Quaternion rotatedQuaternion;
+    rotatedQuaternion.w = qw2 * rotationQuaternion.w - qx2 * rotationQuaternion.x - qy2 * rotationQuaternion.y - qz2 * rotationQuaternion.z;
+    rotatedQuaternion.x = qw2 * rotationQuaternion.x + qx2 * rotationQuaternion.w + qy2 * rotationQuaternion.z - qz2 * rotationQuaternion.y;
+    rotatedQuaternion.y = qw2 * rotationQuaternion.y - qx2 * rotationQuaternion.z + qy2 * rotationQuaternion.w + qz2 * rotationQuaternion.x;
+    rotatedQuaternion.z = qw2 * rotationQuaternion.z + qx2 * rotationQuaternion.y - qy2 * rotationQuaternion.x + qz2 * rotationQuaternion.w;
+    
+    double norm = std::sqrt(rotatedQuaternion.w * rotatedQuaternion.w + rotatedQuaternion.x * rotatedQuaternion.x + rotatedQuaternion.y * rotatedQuaternion.y + rotatedQuaternion.z * rotatedQuaternion.z);
+    rotatedQuaternion.w /= norm;
+    rotatedQuaternion.x /= norm;
+    rotatedQuaternion.y /= norm;
+    rotatedQuaternion.z /= norm;
 
     vx = stream_reader.ReadFloat();
     vy = stream_reader.ReadFloat();
@@ -43,20 +74,20 @@ public:
     }    
 
     geometry_msgs::PoseStamped pose_msg;
-    pose_msg.header.frame_id = "body"; //"odom_nav";
+    pose_msg.header.frame_id = "world"; //"odom_nav";
     pose_msg.header.stamp = ros::Time(header.timestamp + time_offset);
     
     pose_msg.pose.position.x = px;
     pose_msg.pose.position.y = pz;
     pose_msg.pose.position.z = py;
 
-    pose_msg.pose.orientation.x = -qx;
-    pose_msg.pose.orientation.y = -qz;
-    pose_msg.pose.orientation.z = -qy;
-    pose_msg.pose.orientation.w = qw;
+    pose_msg.pose.orientation.x = rotatedQuaternion.x;
+    pose_msg.pose.orientation.y = rotatedQuaternion.y;
+    pose_msg.pose.orientation.z = rotatedQuaternion.z;
+    pose_msg.pose.orientation.w = rotatedQuaternion.w;
 
     geometry_msgs::TwistStamped twist_msg;
-    twist_msg.header.frame_id = "body"; //"odom_nav";
+    twist_msg.header.frame_id = "world"; //"odom_nav";
     twist_msg.header.stamp = pose_msg.header.stamp;
     
     twist_msg.twist.linear.x = vx;    
@@ -66,7 +97,7 @@ public:
     twist_msg.twist.angular.x = rx;
     twist_msg.twist.angular.y = rz;
     twist_msg.twist.angular.z = ry;
-
+       
     pose_publishers_[header.name].publish(pose_msg);
     twist_publishers_[header.name].publish(twist_msg);
 
