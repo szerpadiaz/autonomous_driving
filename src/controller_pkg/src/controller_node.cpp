@@ -40,15 +40,25 @@ class controllerNode{
   Eigen::Vector3d x;     // current position of the UAV's c.o.m. in the world frame
   Eigen::Vector3d v;     // current velocity of the UAV's c.o.m. in the world frame
   Eigen::Matrix3d R;     // current orientation of the UAV
-  Eigen::Vector3d omega; // current angular velocity of the UAV's c.o.m. in the *body* frame
+  Eigen::Vector3d omega; // current angular velocity of the UAV's c.o.m. in the *world* frame
 
   // Desired state
   Eigen::Vector3d xd;    // desired position of the UAV's c.o.m. in the world frame
   Eigen::Vector3d vd;    // desired velocity of the UAV's c.o.m. in the world frame
   Eigen::Vector3d ad;    // desired acceleration of the UAV's c.o.m. in the world frame
   double yawd;           // desired yaw angle
+  double yaw_current;
 
   double hz;             // frequency of the main control loop
+
+  double Kp_v;      // Proportional gain for velocity
+  double Ki_v;      // Integral gain for velocity
+  double err_sum_v; // Sum of errors for velocity
+
+  double Kp_yaw;      // Proportional gain for yaw
+  double Ki_yaw;      // Integral gain for yaw
+  double err_sum_yaw; // Sum of errors for yaw
+  double last_time;   // The last time the control loop was executed
 
   float linear_vel;
   float angular_vel;
@@ -61,6 +71,18 @@ public:
       car_commands = nh.advertise<mav_msgs::Actuators>("car_commands", 1);
       local_path = nh.subscribe("/move_base/TrajectoryPlannerROS/local_plan", 1, &controllerNode::onLocalPath, this);
       
+      // initial values for velocity control and yaw control
+      Kp_v = 0.5;
+      Ki_v = 0.1;
+      err_sum_v = 0;
+      Kp_yaw = 0.5;
+      Ki_yaw = 0.1;
+      err_sum_yaw = 0;
+      last_time = ros::Time::now().toSec();
+
+      // The car will start moving in the x direction with a velocity of 1.0 m/s
+      vd << 0.0, 0, 0;
+
       timer = nh.createTimer(ros::Rate(hz), &controllerNode::controlLoop, this);
   }
 
@@ -92,6 +114,11 @@ public:
       linear_vel *= -1;
     //ROS_INFO("cmd_vel: linear_vel: %f, angular_vel: %f", linear_vel, angular_vel);
 
+    // Set the desired linear velocity in the x direction
+    vd(0) = linear_vel;
+
+    // Set the desired yaw rate
+    yawd = angular_vel;
   }
 
   void onCurrentState(const nav_msgs::Odometry& cur_state){
@@ -103,29 +130,43 @@ public:
     tf::quaternionMsgToEigen (cur_state.pose.pose.orientation, q);
     R = q.toRotationMatrix();
 
-
     // Rotate omega
     omega = R.transpose()*omega;
 
-    //ROS_INFO("Current state - position: %f, %f, %f", x[0], x[1], x[2]);
-    //ROS_INFO("Current state - velocity: %f, %f, %f", v[0], v[1], v[2]);
-  ////ROS_INFO("Current state - orientation: %f, %f, %f", R[0][0], R[1][1], R[2][2]);
-    //ROS_INFO("Current state - angular-vel: %f, %f, %f", omega[0], omega[1], omega[2]);
+    // Get current yaw
+    tf::Quaternion tf_q;
+    tf::quaternionEigenToTF(q, tf_q);
+    yaw_current = tf::getYaw(tf_q);
   }
 
 
   void controlLoop(const ros::TimerEvent& t){
-
     mav_msgs::Actuators msg;
 
     msg.angular_velocities.resize(4);
-    msg.angular_velocities[0] = 0; //linear_vel; // Acceleration
-    msg.angular_velocities[1] = 0;  // Turning angle rate
+
+    // Calculate the acceleration command based on the velocity error
+    double err_v = vd(0) - v(0);
+    err_sum_v += err_v * (ros::Time::now().toSec() - last_time);
+    auto acceleration = Kp_v * err_v + Ki_v * err_sum_v;
+
+    // Calculate the turning angle rate command based on the yaw error
+    double err_yaw = yawd - omega(2); // omega(2) is the current yaw rate
+    err_sum_yaw += err_yaw * (ros::Time::now().toSec() - last_time);
+    auto yaw_rate = Kp_yaw * err_yaw + Ki_yaw * err_sum_yaw;
+
+    msg.angular_velocities[0] = 0; //acceleration;
+    msg.angular_velocities[1] = 0; //yaw_rate;
+
     msg.angular_velocities[2] = 0;  // Breaking
     msg.angular_velocities[3] = 0;
 
     car_commands.publish(msg);
 
+    last_time = ros::Time::now().toSec();
+
+    ROS_INFO("acceleration: %f", acceleration);
+    ROS_INFO("yaw_rate: %f", yaw_rate);
   }
 };
 

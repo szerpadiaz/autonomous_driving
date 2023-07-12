@@ -5,8 +5,8 @@ local_costmap:
     publish_frequency: 2.0
    
     rolling_window: true
-    width: 15
-    height: 15
+    width: 50
+    height: 50
     resolution: 1.0
 
     plugins: 
@@ -20,7 +20,7 @@ local_costmap:
 
 
     inflation_layer:
-        enabled:              true
+        enabled:              false
         cost_scaling_factor:  5  
         inflation_radius:     1.0
 

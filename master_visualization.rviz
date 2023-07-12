@@ -5,9 +5,9 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Car frame1
+        - /base_link1
         - /Local cost map1
         - /Goal1
-        - /Local plan1
       Splitter Ratio: 0.4686567187309265
     Tree Height: 574
   - Class: rviz/Selection
@@ -65,7 +65,7 @@ Visualization Manager:
     - Alpha: 1
       Class: rviz/Axes
       Enabled: false
-      Length: 7
+      Length: 1
       Name: Car frame
       Radius: 0.10000000149011612
       Reference Frame: true_body
@@ -73,13 +73,13 @@ Visualization Manager:
       Value: false
     - Alpha: 1
       Class: rviz/Axes
-      Enabled: false
-      Length: 2
+      Enabled: true
+      Length: 1
       Name: base_link
       Radius: 0.10000000149011612
       Reference Frame: base_link
       Show Trail: false
-      Value: false
+      Value: true
     - Alpha: 1
       Class: rviz/Polygon
       Color: 115; 210; 22
@@ -282,7 +282,7 @@ Visualization Manager:
       Buffer Length: 1
       Class: rviz/Path
       Color: 25; 255; 0
-      Enabled: true
+      Enabled: false
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
@@ -301,7 +301,7 @@ Visualization Manager:
       Shaft Length: 0.10000000149011612
       Topic: /move_base/NavfnROS/plan
       Unreliable: false
-      Value: true
+      Value: false
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
@@ -413,7 +413,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 318.6114501953125
+      Distance: 58.107444763183594
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
