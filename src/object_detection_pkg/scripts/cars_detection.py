@@ -82,7 +82,7 @@ def depth_callback(depth_msg):
             points = convert_contours_to_points(contours, depth_image)
             header = std_msgs.msg.Header()
             header.stamp = rospy.Time.now()
-            header.frame_id = 'true_body'
+            header.frame_id = 'body'
             point_cloud_msg = pcl2.create_cloud_xyz32(header, points)
             point_cloud_publisher.publish(point_cloud_msg)
 

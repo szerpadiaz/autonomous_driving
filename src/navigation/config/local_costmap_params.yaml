@@ -1,6 +1,6 @@
 local_costmap:
     global_frame: world
-    robot_base_frame: true_body
+    robot_base_frame: body
     update_frequency: 1.0
     publish_frequency: 1.0
    

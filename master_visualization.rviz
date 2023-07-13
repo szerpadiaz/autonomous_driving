@@ -4,8 +4,8 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
+        - /Car frame1
         - /Local cost map1
-        - /Axes1
       Splitter Ratio: 0.4686567187309265
     Tree Height: 531
   - Class: rviz/Selection
@@ -66,7 +66,7 @@ Visualization Manager:
       Length: 7
       Name: Car frame
       Radius: 0.10000000149011612
-      Reference Frame: true_body
+      Reference Frame: body
       Show Trail: false
       Value: true
     - Alpha: 1
@@ -109,7 +109,6 @@ Visualization Manager:
         2D map (dilated): true
         2D map (without dilation): true
         3D map (voxel-grid): true
-        Axes: true
         Car footprint: true
         Car frame: true
         Current goal: true
@@ -209,12 +208,12 @@ Visualization Manager:
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: false
-      Enabled: false
+      Enabled: true
       Name: 2D map (dilated)
       Topic: /projected_map_2
       Unreliable: false
       Use Timestamp: false
-      Value: false
+      Value: true
     - Alpha: 0.699999988079071
       Class: rviz/Map
       Color Scheme: costmap
@@ -374,15 +373,6 @@ Visualization Manager:
       Topic: /current_state_est
       Unreliable: false
       Value: true
-    - Alpha: 1
-      Class: rviz/Axes
-      Enabled: true
-      Length: 1
-      Name: Axes
-      Radius: 0.10000000149011612
-      Reference Frame: map
-      Show Trail: false
-      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -411,7 +401,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 675.7593383789062
+      Distance: 460.5110778808594
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
