@@ -42,6 +42,7 @@ class controllerNode{
   Eigen::Matrix3d R;     // current orientation of the UAV
   Eigen::Vector3d omega; // current angular velocity of the UAV's c.o.m. in the *body* frame
   float omega_control;
+  float velocity_control;
 
   // Desired state
   Eigen::Vector3d xd;    // desired position of the UAV's c.o.m. in the world frame
@@ -60,35 +61,12 @@ public:
       current_state = nh.subscribe("current_state_est", 1, &controllerNode::onCurrentState, this);
       cmd_vel = nh.subscribe("cmd_vel", 1, &controllerNode::onCmdVelocity, this);
       car_commands = nh.advertise<mav_msgs::Actuators>("car_commands", 1);
-      local_path = nh.subscribe("/move_base/TrajectoryPlannerROS/local_plan", 1, &controllerNode::onLocalPath, this);
-      
       timer = nh.createTimer(ros::Rate(hz), &controllerNode::controlLoop, this);
-  }
-
-  void onLocalPath(const nav_msgs::Path::ConstPtr& localPlan){
-    int numPoses = localPlan->poses.size();
-    //ROS_INFO("Number of poses in the local plan: %d", numPoses);
-
-    for (const auto& pose : localPlan->poses)
-    {
-      const auto& position = pose.pose.position;
-      const auto& orientation = pose.pose.orientation;
-      //ROS_INFO("Position: [x=%.2f, y=%.2f, z=%.2f]", position.x, position.y, position.z);
-      //ROS_INFO("Orientation: [x=%.2f, y=%.2f, z=%.2f, w=%.2f]", orientation.x, orientation.y, orientation.z, orientation.w);
-    }
   }
 
   void onCmdVelocity(const geometry_msgs::Twist& msg){
     linear_vel = msg.linear.x;
-    
-    //Eigen::Vector3d omega_vector;
-    //omega_vector[0] = msg.angular.x;
-    //omega_vector[1] = msg.angular.y;
-    //omega_vector[2] = msg.angular.z;
-    //auto desired_omega = R.transpose() * omega_vector;
-    //angular_vel = desired_omega[2];
     angular_vel = msg.angular.z;
-
   }
 
   void onCurrentState(const nav_msgs::Odometry& cur_state){
@@ -100,7 +78,6 @@ public:
     tf::quaternionMsgToEigen (cur_state.pose.pose.orientation, q);
     R = q.toRotationMatrix();
 
-
     // Rotate omega
     omega = R.transpose() * omega;
     v = R.transpose() * v;
@@ -108,16 +85,25 @@ public:
     if (omega_control < -3){
       omega_control = -3;}
     if (omega_control > 3){
-      omega_control = 3;}   
+      omega_control = 3;}
+  
+    velocity_control = v(0) - linear_vel;
+    if(velocity_control < -1) {
+      velocity_control = -1;
+    }
+    if(velocity_control > 4) {
+      velocity_control = 4;
+    }
+      
+    //ROS_INFO("velocity_control = %f ; v = %f ;  omega_control = %f", velocity_control, v(0), omega_control);
   }
 
 
   void controlLoop(const ros::TimerEvent& t){
 
     mav_msgs::Actuators msg;
-
     msg.angular_velocities.resize(4);
-    msg.angular_velocities[0] = 4 - v(0); // Acceleration
+    msg.angular_velocities[0] = velocity_control; // Acceleration
     msg.angular_velocities[1] = omega_control;  // Turning angle rate
     msg.angular_velocities[2] = 0;  // Breaking
     msg.angular_velocities[3] = 0;
