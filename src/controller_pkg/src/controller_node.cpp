@@ -55,6 +55,21 @@ class controllerNode{
   float linear_vel;
   float angular_vel;
 
+  double integral_error_v = 0.0;
+  double derivative_error_v = 0.0; 
+  double previous_error_v = 0.0;
+  double derivative_error_omega = 0.0;
+  double previous_error_omega = 0.0;
+  double integral_error_omega = 0.0;
+
+  double Kp_v = 1.0; //3;
+  double Ki_v = 0.3; //36;
+  double Kd_v = 0.01; 
+
+  double Kp_omega = 1.0;
+  double Kd_omega = 0.1;
+  double Ki_omega = 0;
+
 public:
   controllerNode():hz(50.0){
       
@@ -81,12 +96,15 @@ public:
     // Rotate omega
     omega = R.transpose() * omega;
     v = R.transpose() * v;
+
     omega_control  = (-angular_vel);
     if (omega_control < -3){
       omega_control = -3;}
     if (omega_control > 3){
       omega_control = 3;}
-  
+    integral_error_omega += omega_control * (1.0 / hz);
+    derivative_error_omega = (omega_control - previous_error_omega) * hz;
+
     velocity_control = v(0) - linear_vel;
     if(velocity_control < -1) {
       velocity_control = -1;
@@ -94,24 +112,31 @@ public:
     if(velocity_control > 4) {
       velocity_control = 4;
     }
-      
-    //ROS_INFO("velocity_control = %f ; v = %f ;  omega_control = %f", velocity_control, v(0), omega_control);
+    integral_error_v += velocity_control * (1.0 / hz);
+    derivative_error_v = (velocity_control - previous_error_v) * hz;
+
+    // Update previous errors
+    previous_error_v = velocity_control;
+    previous_error_omega = omega_control;
   }
 
 
   void controlLoop(const ros::TimerEvent& t){
 
     mav_msgs::Actuators msg;
+
     msg.angular_velocities.resize(4);
-    msg.angular_velocities[0] = velocity_control; // Acceleration
-    msg.angular_velocities[1] = omega_control;  // Turning angle rate
+
+    auto acc = Kp_v * velocity_control + Ki_v * integral_error_v + Kd_v * derivative_error_v;
+    auto turning_rate = Kp_omega * omega_control + Ki_omega * integral_error_omega + Kd_omega * derivative_error_omega;
+
+    msg.angular_velocities[0] = acc;
+    msg.angular_velocities[1] = turning_rate;
     msg.angular_velocities[2] = 0;  // Breaking
     msg.angular_velocities[3] = 0;
-    
-    //ROS_INFO("cmd_vel: linear_vel: %f, angular_vel: %f", linear_vel, omega_control);
 
     car_commands.publish(msg);
-
+    //ROS_INFO("acceleration: %f, turning-angle-rate: %f ", acc, turning_rate);
   }
 };
 
