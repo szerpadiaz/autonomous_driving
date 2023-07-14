@@ -8,6 +8,9 @@ from std_msgs.msg import String
 # Global variables to store the segmentation and RGB images
 segmentation_image = None
 rgb_image_rgb = None
+# Set the desired resolution for the images
+new_width = 1280  # Adjust the width as desired
+new_height = 720  # Adjust the height as desired
 
 # Callback function to process the received segmentation message
 def segmentation_callback(segmentation_msg):
@@ -21,7 +24,7 @@ def segmentation_callback(segmentation_msg):
         segmentation_image = cv2.resize(segmentation_image, (new_width, new_height))
         # Extract the new image containing the two middle parts
         segmentation_image = segmentation_image[:,360:720]
-        cv2.imwrite("segment2.jpg", segmentation_image)
+        
     except CvBridgeError as e:
         rospy.logerr("CvBridge Error: {0}".format(e))
 
@@ -37,7 +40,6 @@ def rgb_callback(rgb_msg):
         rgb_image_rgb = cv2.resize(rgb_image_rgb, (new_width, new_height))
         rgb_image_rgb = rgb_image_rgb[:,360:720]
 
-        cv2.imwrite("rgb2.jpg", rgb_image_rgb)
         # Check if the segmentation image is available
         if segmentation_image is not None:
             # Threshold the semantic segmentation image to create a binary mask
@@ -61,16 +63,12 @@ def rgb_callback(rgb_msg):
                     # Apply the new mask to the RGB image to crop out the region of your object
                     cropped_image_rgb = cv2.bitwise_and(rgb_image_rgb, new_mask)
 
-                    # # Convert the cropped image back to BGR format
-                    # cropped_image_bgr = cv2.cvtColor(cropped_image_rgb, cv2.COLOR_RGB2BGR)
-
                     # Find the bounding box coordinates of the contour
                     x, y, w, h = cv2.boundingRect(selected_contour)
 
                     # Draw the bounding box on the original RGB image
                     bounding_box_image = cropped_image_rgb.copy()
                     cv2.rectangle(bounding_box_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                    cv2.imwrite("bounding_box_image.jpg", bounding_box_image)
 
                     # Crop out the region within the bounding box
                     cropped_image_rgb = cropped_image_rgb[y:y+h, x:x+w]
@@ -98,43 +96,24 @@ def rgb_callback(rgb_msg):
                     yellow_pixel_count = cv2.countNonZero(yellow_mask)
                     green_pixel_count = cv2.countNonZero(green_mask)
 
-                    # Determine the dominant color based on the pixel counts
+                    # Determine the dominant color based on the pixel counts 
                     if red_pixel_count > yellow_pixel_count and red_pixel_count > green_pixel_count:
                         dominant_color = "Red"
-                        cv2.imwrite("bounding_box_image_red.jpg", bounding_box_image)
-                    elif yellow_pixel_count > red_pixel_count and yellow_pixel_count > green_pixel_count:
-                        dominant_color = "Yellow"
-                        cv2.imwrite("bounding_box_image_yellow.jpg", bounding_box_image)
                     else:
                         dominant_color = "Green"
-                        cv2.imwrite("bounding_box_image_green.jpg", bounding_box_image)
-
-                    # Print the dominant color
-                    # print("Dominant Color:", dominant_color)
+                    
                     # Publish the dominant color as a String message
                     color_msg = String()
                     color_msg.data = dominant_color
                     pub.publish(color_msg)
-                else:
-                    pass
-                    # print("No contour with area greater than 50 found.")
-            else:
-                pass
-                # print("No contours found.")
 
     except CvBridgeError as e:
         rospy.logerr("CvBridge Error: {0}".format(e))
 
 # Initialize the ROS node
 rospy.init_node("traffic_light_color")
-
 # Create a publisher to publish the processed dominant color
 pub = rospy.Publisher("traffic_light_color", String, queue_size=1)
-
-# Set the desired resolution for the images
-new_width = 1280  # Adjust the width as desired
-new_height = 720  # Adjust the height as desired
-
 # Subscribe to the segmentation and RGB image topics
 segmentation_topic = "/unity_ros/OurCar/Sensors/SemanticCamera/image_raw"
 rgb_topic = "/unity_ros/OurCar/Sensors/RGBCameraRight/image_raw"
