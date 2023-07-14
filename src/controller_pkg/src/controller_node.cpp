@@ -130,6 +130,13 @@ public:
     auto acc = Kp_v * velocity_control + Ki_v * integral_error_v + Kd_v * derivative_error_v;
     auto turning_rate = Kp_omega * omega_control + Ki_omega * integral_error_omega + Kd_omega * derivative_error_omega;
 
+    if(acc < 0) {
+      acc = 0;
+    }
+    if(acc > 5) {
+      acc = 5;
+    }
+
     msg.angular_velocities[0] = acc;
     msg.angular_velocities[1] = turning_rate;
     msg.angular_velocities[2] = 0;  // Breaking
