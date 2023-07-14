@@ -105,12 +105,12 @@ public:
     integral_error_omega += omega_control * (1.0 / hz);
     derivative_error_omega = (omega_control - previous_error_omega) * hz;
 
-    velocity_control = v(0) - linear_vel;
+    velocity_control = 4 - v(0); // - linear_vel;
     if(velocity_control < -1) {
       velocity_control = -1;
     }
-    if(velocity_control > 4) {
-      velocity_control = 4;
+    if(velocity_control > 3) {
+      velocity_control = 3;
     }
     integral_error_v += velocity_control * (1.0 / hz);
     derivative_error_v = (velocity_control - previous_error_v) * hz;
@@ -127,14 +127,15 @@ public:
 
     msg.angular_velocities.resize(4);
 
-    auto acc = Kp_v * velocity_control + Ki_v * integral_error_v + Kd_v * derivative_error_v;
+    //auto acc = Kp_v * velocity_control + Ki_v * integral_error_v + Kd_v * derivative_error_v;
+    auto acc = velocity_control;
     auto turning_rate = Kp_omega * omega_control + Ki_omega * integral_error_omega + Kd_omega * derivative_error_omega;
 
     if(acc < 0) {
       acc = 0;
     }
-    if(acc > 5) {
-      acc = 5;
+    if(acc > 3) {
+      acc = 3;
     }
 
     msg.angular_velocities[0] = acc;
