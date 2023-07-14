@@ -4,61 +4,74 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseStamped, TwistStamped, Vector3, Quaternion
 
 import numpy as np
-from geometry_msgs.msg import Quaternion
-import tf
+from tf.transformations import quaternion_matrix
 
 def pose_callback(pose_msg_stamped):
+    global odom_msg
     # Process the received PoseStamped message and update the Odometry message
     pose_msg = pose_msg_stamped.pose
     odom_msg.pose.pose.position = pose_msg.position
     odom_msg.pose.pose.orientation = pose_msg.orientation
 
-
-# Convert Quaternion message to Eigen::Quaterniond
-def quaternion_msg_to_euler(quaternion_msg):
-    quaternion = [quaternion_msg.x, quaternion_msg.y, quaternion_msg.z, quaternion_msg.w]
-    euler = tf.transformations.euler_from_quaternion(quaternion)
-    return euler
-
 def twist_callback(twist_msg_stamped):
-    # Process the received TwistStamped message and update the Odometry message
+    global odom_msg
     twist_msg = twist_msg_stamped.twist
-    odom_msg.twist.twist.linear = twist_msg.linear
+    v = np.array([twist_msg.linear.x, twist_msg.linear.y, twist_msg.linear.z])
+    omega = np.array([twist_msg.angular.x, twist_msg.angular.y, twist_msg.angular.z])
 
-    #euler = quaternion_msg_to_euler(odom_msg.pose.pose.orientation)
-    #R = tf.transformations.euler_matrix(euler[0], euler[1], euler[2])
-    #angular_vel = np.array([twist_msg.angular.x, twist_msg.angular.y, twist_msg.angular.z])
-    #rotated_angular_vel =  np.dot(R[:3, :3].transpose(), angular_vel)
-    #odom_msg.twist.twist.angular.x = rotated_angular_vel[0]
-    #odom_msg.twist.twist.angular.y = rotated_angular_vel[1]
-    #odom_msg.twist.twist.angular.z = rotated_angular_vel[2]
-    
-    odom_msg.twist.twist.angular.x = twist_msg.angular.x
-    odom_msg.twist.twist.angular.y = twist_msg.angular.y
-    odom_msg.twist.twist.angular.z = twist_msg.angular.z
+    q = Quaternion(odom_msg.pose.pose.orientation.x,
+                   odom_msg.pose.pose.orientation.y,
+                   odom_msg.pose.pose.orientation.z,
+                   odom_msg.pose.pose.orientation.w)
+    R = quaternion_matrix([q.x, q.y, q.z, q.w])[:3, :3]
+
+    omega = np.dot(R.transpose(), omega)  # Rotate omega
+    v = np.dot(R.transpose(), v)          # Rotate v
+
+    odom_msg.twist.twist.linear.x = v[0]
+    odom_msg.twist.twist.linear.y = v[1]
+    odom_msg.twist.twist.linear.z = v[2]
+
+    odom_msg.twist.twist.angular.x = omega[0]
+    odom_msg.twist.twist.angular.y = omega[1]
+    odom_msg.twist.twist.angular.z = omega[2]
+
 
 if __name__ == '__main__':
     rospy.init_node('odometry_publisher')
 
     # Create a publisher for the odometry topic
-    odom_pub = rospy.Publisher('/odom', Odometry, queue_size=10)
+    odom_pub = rospy.Publisher('/odom', Odometry, queue_size=1)
 
     # Create an Odometry message object
     odom_msg = Odometry()
 
+<<<<<<< HEAD
     # Set the frame ID
     odom_msg.header.frame_id = 'true_body'
 
     # Set the child frame ID
     odom_msg.child_frame_id = 'world'
+=======
+    # The position, orientation and velocity are given in the world frame
+    odom_msg.header.frame_id = 'world'
+
+    # The reference frame that is attached to the car is the 'body'frame
+    odom_msg.child_frame_id = 'body'
+
+    # The odometry message says: the 'body' frame has the pose in the 'world' frame
+    # and the velocity in the body frame
+>>>>>>> ff67ebf761d7e033997a415bea1db249b85d1e78
 
     # Create subscribers for the PoseStamped and TwistStamped topics
     rospy.Subscriber('/true_pose', PoseStamped, pose_callback)
     rospy.Subscriber('/true_twist', TwistStamped, twist_callback)
 
-    rate = rospy.Rate(1000)  # Publish at 10 Hz
+    rate = rospy.Rate(50)  # Publish at 10 Hz
 
     while not rospy.is_shutdown():
         # Publish the Odometry message
         odom_pub.publish(odom_msg)
         rate.sleep()
+
+

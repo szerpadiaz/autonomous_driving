@@ -87,6 +87,8 @@ void wCallback(const mav_msgs::Actuators& cmd)
   Arr[3]=cmd.angular_velocities[3];
 
   std::cout <<"Message received: "<< Arr[0] << " "  << Arr[1] << " "<< Arr [2] << " "  << Arr[3] << " " << "\n";
+  ROS_INFO("Sent cmd_vel: linear_vel: %f, angular_vel: %f", Arr[0] , Arr[1]);
+
 
   return;
 }

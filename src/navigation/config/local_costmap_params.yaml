@@ -1,5 +1,6 @@
 local_costmap:
     global_frame: world
+<<<<<<< HEAD
     robot_base_frame: base_link
     update_frequency: 5.0
     publish_frequency: 2.0
@@ -8,6 +9,20 @@ local_costmap:
     width: 50
     height: 50
     resolution: 1.0
+=======
+    robot_base_frame: body
+    update_frequency: 1.0
+    publish_frequency: 1.0
+   
+    rolling_window: true
+    width: 40
+    height: 40
+    resolution: 2.0
+    
+    transform_tolerance: 4.0 
+    
+    inflate_around_unknown: true 
+>>>>>>> ff67ebf761d7e033997a415bea1db249b85d1e78
 
     plugins: 
         - {name: static_layer,            type: "costmap_2d::StaticLayer"}
@@ -20,9 +35,15 @@ local_costmap:
 
 
     inflation_layer:
+<<<<<<< HEAD
         enabled:              false
         cost_scaling_factor:  5  
         inflation_radius:     1.0
+=======
+        enabled:              true
+        cost_scaling_factor:  500  
+        inflation_radius:     30
+>>>>>>> ff67ebf761d7e033997a415bea1db249b85d1e78
 
     obstacle_layer:
         enabled: false

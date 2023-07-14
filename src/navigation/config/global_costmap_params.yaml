@@ -1,11 +1,16 @@
 global_costmap:
     global_frame: world
+<<<<<<< HEAD
     robot_base_frame: base_link
     update_frequency: 5.0
+=======
+    robot_base_frame: body
+    update_frequency: 2.0
+>>>>>>> ff67ebf761d7e033997a415bea1db249b85d1e78
     rolling_window: false
-    width: 350
-    height: 350
-    resolution: 1.0
+    width: 300
+    height: 300
+    resolution: 2.0
 
     plugins: 
     - {name: static_layer, type: "costmap_2d::StaticLayer"}
@@ -17,9 +22,15 @@ global_costmap:
         map_topic: "projected_map_2"
 
     inflation_layer:
+<<<<<<< HEAD
         enabled: false
         cost_scaling_factor: 5
         inflation_radius: 1.0
+=======
+        enabled: true
+        cost_scaling_factor: 30
+        inflation_radius: 10.0
+>>>>>>> ff67ebf761d7e033997a415bea1db249b85d1e78
 
     obstacle_layer:
         enabled: false

@@ -5,9 +5,13 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Car frame1
+<<<<<<< HEAD
         - /base_link1
         - /Local cost map1
         - /Goal1
+=======
+        - /Local cost map1
+>>>>>>> ff67ebf761d7e033997a415bea1db249b85d1e78
       Splitter Ratio: 0.4686567187309265
     Tree Height: 574
   - Class: rviz/Selection
@@ -68,7 +72,7 @@ Visualization Manager:
       Length: 1
       Name: Car frame
       Radius: 0.10000000149011612
-      Reference Frame: true_body
+      Reference Frame: body
       Show Trail: false
       Value: false
     - Alpha: 1
@@ -384,7 +388,11 @@ Visualization Manager:
         Value: Axes
       Topic: /current_state_est
       Unreliable: false
+<<<<<<< HEAD
       Value: false
+=======
+      Value: true
+>>>>>>> ff67ebf761d7e033997a415bea1db249b85d1e78
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -413,7 +421,11 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
+<<<<<<< HEAD
       Distance: 58.107444763183594
+=======
+      Distance: 460.5110778808594
+>>>>>>> ff67ebf761d7e033997a415bea1db249b85d1e78
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1

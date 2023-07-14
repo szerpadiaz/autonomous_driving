@@ -1,7 +1,6 @@
 <launch>
 
 <!-- Localization -->
-<node pkg="perception_pkg" type="localization_node" name="localization_node" output="screen"> </node>
 
 <!-- Perception: point cloud generation using depth_image_proc-->
   <node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager" />

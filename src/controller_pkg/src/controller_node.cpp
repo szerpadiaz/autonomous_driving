@@ -40,7 +40,13 @@ class controllerNode{
   Eigen::Vector3d x;     // current position of the UAV's c.o.m. in the world frame
   Eigen::Vector3d v;     // current velocity of the UAV's c.o.m. in the world frame
   Eigen::Matrix3d R;     // current orientation of the UAV
+<<<<<<< HEAD
   Eigen::Vector3d omega; // current angular velocity of the UAV's c.o.m. in the *world* frame
+=======
+  Eigen::Vector3d omega; // current angular velocity of the UAV's c.o.m. in the *body* frame
+  float omega_control;
+  float velocity_control;
+>>>>>>> ff67ebf761d7e033997a415bea1db249b85d1e78
 
   // Desired state
   Eigen::Vector3d xd;    // desired position of the UAV's c.o.m. in the world frame
@@ -63,12 +69,28 @@ class controllerNode{
   float linear_vel;
   float angular_vel;
 
+  double integral_error_v = 0.0;
+  double derivative_error_v = 0.0; 
+  double previous_error_v = 0.0;
+  double derivative_error_omega = 0.0;
+  double previous_error_omega = 0.0;
+  double integral_error_omega = 0.0;
+
+  double Kp_v = 1.0; //3;
+  double Ki_v = 0.3; //36;
+  double Kd_v = 0.01; 
+
+  double Kp_omega = 1.0;
+  double Kd_omega = 0.1;
+  double Ki_omega = 0;
+
 public:
-  controllerNode():hz(1000.0){
+  controllerNode():hz(50.0){
       
       current_state = nh.subscribe("current_state_est", 1, &controllerNode::onCurrentState, this);
       cmd_vel = nh.subscribe("cmd_vel", 1, &controllerNode::onCmdVelocity, this);
       car_commands = nh.advertise<mav_msgs::Actuators>("car_commands", 1);
+<<<<<<< HEAD
       local_path = nh.subscribe("/move_base/TrajectoryPlannerROS/local_plan", 1, &controllerNode::onLocalPath, this);
       
       // initial values for velocity control and yaw control
@@ -83,32 +105,15 @@ public:
       // The car will start moving in the x direction with a velocity of 1.0 m/s
       vd << 0.0, 0, 0;
 
+=======
+>>>>>>> ff67ebf761d7e033997a415bea1db249b85d1e78
       timer = nh.createTimer(ros::Rate(hz), &controllerNode::controlLoop, this);
-  }
-
-  void onLocalPath(const nav_msgs::Path::ConstPtr& localPlan){
-    int numPoses = localPlan->poses.size();
-    //ROS_INFO("Number of poses in the local plan: %d", numPoses);
-
-    for (const auto& pose : localPlan->poses)
-    {
-      const auto& position = pose.pose.position;
-      const auto& orientation = pose.pose.orientation;
-      //ROS_INFO("Position: [x=%.2f, y=%.2f, z=%.2f]", position.x, position.y, position.z);
-      //ROS_INFO("Orientation: [x=%.2f, y=%.2f, z=%.2f, w=%.2f]", orientation.x, orientation.y, orientation.z, orientation.w);
-    }
   }
 
   void onCmdVelocity(const geometry_msgs::Twist& msg){
     linear_vel = msg.linear.x;
-    
-    //Eigen::Vector3d omega_vector;
-    //omega_vector[0] = msg.angular.x;
-    //omega_vector[1] = msg.angular.y;
-    //omega_vector[2] = msg.angular.z;
-    //auto desired_omega = R.transpose() * omega_vector;
-    //angular_vel = desired_omega[2];
     angular_vel = msg.angular.z;
+<<<<<<< HEAD
 
     if(linear_vel < 0)
       linear_vel *= -1;
@@ -119,6 +124,8 @@ public:
 
     // Set the desired yaw rate
     yawd = angular_vel;
+=======
+>>>>>>> ff67ebf761d7e033997a415bea1db249b85d1e78
   }
 
   void onCurrentState(const nav_msgs::Odometry& cur_state){
@@ -131,12 +138,37 @@ public:
     R = q.toRotationMatrix();
 
     // Rotate omega
-    omega = R.transpose()*omega;
+    omega = R.transpose() * omega;
+    v = R.transpose() * v;
 
+    omega_control  = (-angular_vel);
+    if (omega_control < -3){
+      omega_control = -3;}
+    if (omega_control > 3){
+      omega_control = 3;}
+    integral_error_omega += omega_control * (1.0 / hz);
+    derivative_error_omega = (omega_control - previous_error_omega) * hz;
+
+    velocity_control = v(0) - linear_vel;
+    if(velocity_control < -1) {
+      velocity_control = -1;
+    }
+    if(velocity_control > 4) {
+      velocity_control = 4;
+    }
+    integral_error_v += velocity_control * (1.0 / hz);
+    derivative_error_v = (velocity_control - previous_error_v) * hz;
+
+<<<<<<< HEAD
     // Get current yaw
     tf::Quaternion tf_q;
     tf::quaternionEigenToTF(q, tf_q);
     yaw_current = tf::getYaw(tf_q);
+=======
+    // Update previous errors
+    previous_error_v = velocity_control;
+    previous_error_omega = omega_control;
+>>>>>>> ff67ebf761d7e033997a415bea1db249b85d1e78
   }
 
 
@@ -145,6 +177,7 @@ public:
 
     msg.angular_velocities.resize(4);
 
+<<<<<<< HEAD
     // Calculate the acceleration command based on the velocity error
     double err_v = vd(0) - v(0);
     err_sum_v += err_v * (ros::Time::now().toSec() - last_time);
@@ -158,15 +191,33 @@ public:
     msg.angular_velocities[0] = 0; //acceleration;
     msg.angular_velocities[1] = 0; //yaw_rate;
 
+=======
+    auto acc = Kp_v * velocity_control + Ki_v * integral_error_v + Kd_v * derivative_error_v;
+    auto turning_rate = Kp_omega * omega_control + Ki_omega * integral_error_omega + Kd_omega * derivative_error_omega;
+
+    if(acc < 0) {
+      acc = 0;
+    }
+    if(acc > 5) {
+      acc = 5;
+    }
+
+    msg.angular_velocities[0] = acc;
+    msg.angular_velocities[1] = turning_rate;
+>>>>>>> ff67ebf761d7e033997a415bea1db249b85d1e78
     msg.angular_velocities[2] = 0;  // Breaking
     msg.angular_velocities[3] = 0;
 
     car_commands.publish(msg);
+<<<<<<< HEAD
 
     last_time = ros::Time::now().toSec();
 
     ROS_INFO("acceleration: %f", acceleration);
     ROS_INFO("yaw_rate: %f", yaw_rate);
+=======
+    //ROS_INFO("acceleration: %f, turning-angle-rate: %f ", acc, turning_rate);
+>>>>>>> ff67ebf761d7e033997a415bea1db249b85d1e78
   }
 };
 
