@@ -62,10 +62,12 @@ class controllerNode{
   double previous_error_omega = 0.0;
   double integral_error_omega = 0.0;
 
+  // velocity control
   double Kp_v = 1.0; //3;
   double Ki_v = 0.3; //36;
   double Kd_v = 0.01; 
 
+  // omega control
   double Kp_omega = 1.0;
   double Kd_omega = 0.1;
   double Ki_omega = 0;
@@ -97,7 +99,8 @@ public:
     omega = R.transpose() * omega;
     v = R.transpose() * v;
 
-    omega_control  = (-angular_vel);
+    // omega_control  = (-angular_vel) - omega[2]; //This doesn't work
+    omega_control = (-angular_vel);
     if (omega_control < -3){
       omega_control = -3;}
     if (omega_control > 3){
@@ -105,12 +108,13 @@ public:
     integral_error_omega += omega_control * (1.0 / hz);
     derivative_error_omega = (omega_control - previous_error_omega) * hz;
 
-    velocity_control = 4 - v(0); // - linear_vel;
-    if(velocity_control < -1) {
-      velocity_control = -1;
+    //velocity_control = -linear_vel - v(0);
+    velocity_control = 4 - v(0); 
+    if(velocity_control < 1.1) {
+      velocity_control = 1.1;
     }
-    if(velocity_control > 3) {
-      velocity_control = 3;
+    if(velocity_control > 2.5) {
+      velocity_control = 2.5;
     }
     integral_error_v += velocity_control * (1.0 / hz);
     derivative_error_v = (velocity_control - previous_error_v) * hz;
@@ -127,15 +131,17 @@ public:
 
     msg.angular_velocities.resize(4);
 
-    //auto acc = Kp_v * velocity_control + Ki_v * integral_error_v + Kd_v * derivative_error_v;
-    auto acc = velocity_control;
-    auto turning_rate = Kp_omega * omega_control + Ki_omega * integral_error_omega + Kd_omega * derivative_error_omega;
+    //double acc = Kp_v * velocity_control + Ki_v * integral_error_v + Kd_v * derivative_error_v;
+    auto acc = 4 - v(0);
+
+    //double turning_rate = Kp_omega * omega_control + Ki_omega * integral_error_omega + Kd_omega * derivative_error_omega;
+    auto turning_rate = omega_control;
 
     if(acc < 0) {
       acc = 0;
     }
-    if(acc > 3) {
-      acc = 3;
+    if(acc > 2.5) {
+      acc = 2.5;
     }
 
     msg.angular_velocities[0] = acc;
@@ -144,7 +150,6 @@ public:
     msg.angular_velocities[3] = 0;
 
     car_commands.publish(msg);
-    //ROS_INFO("acceleration: %f, turning-angle-rate: %f ", acc, turning_rate);
   }
 };
 
