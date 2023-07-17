@@ -41,8 +41,6 @@ class controllerNode{
   Eigen::Vector3d v;     // current velocity of the UAV's c.o.m. in the world frame
   Eigen::Matrix3d R;     // current orientation of the UAV
   Eigen::Vector3d omega; // current angular velocity of the UAV's c.o.m. in the *body* frame
-  float omega_control;
-  float velocity_control;
 
   // Desired state
   Eigen::Vector3d xd;    // desired position of the UAV's c.o.m. in the world frame
@@ -69,8 +67,8 @@ class controllerNode{
 
   // omega control
   double Kp_omega = 1.0;
+  double Ki_omega = 0.0;
   double Kd_omega = 0.1;
-  double Ki_omega = 0;
 
 public:
   controllerNode():hz(50.0){
@@ -98,30 +96,6 @@ public:
     // Rotate omega
     omega = R.transpose() * omega;
     v = R.transpose() * v;
-
-    // omega_control  = (-angular_vel) - omega[2]; //This doesn't work
-    omega_control = (-angular_vel);
-    if (omega_control < -3){
-      omega_control = -3;}
-    if (omega_control > 3){
-      omega_control = 3;}
-    integral_error_omega += omega_control * (1.0 / hz);
-    derivative_error_omega = (omega_control - previous_error_omega) * hz;
-
-    //velocity_control = -linear_vel - v(0);
-    velocity_control = 4 - v(0); 
-    if(velocity_control < 1.1) {
-      velocity_control = 1.1;
-    }
-    if(velocity_control > 2.5) {
-      velocity_control = 2.5;
-    }
-    integral_error_v += velocity_control * (1.0 / hz);
-    derivative_error_v = (velocity_control - previous_error_v) * hz;
-
-    // Update previous errors
-    previous_error_v = velocity_control;
-    previous_error_omega = omega_control;
   }
 
 
@@ -131,22 +105,42 @@ public:
 
     msg.angular_velocities.resize(4);
 
-    //double acc = Kp_v * velocity_control + Ki_v * integral_error_v + Kd_v * derivative_error_v;
-    auto acc = 4 - v(0);
+    // Longitudinal control
+    auto vd = -linear_vel;
+    auto e = vd - v(0);
+    integral_error_v = integral_error_v + e * hz;
+    derivative_error_v = (e - previous_error_v) / hz;
+    auto u = Kp_v * e + Ki_v * integral_error_v + Kd_v * derivative_error_v;
+    previous_error_v = e;
 
-    //double turning_rate = Kp_omega * omega_control + Ki_omega * integral_error_omega + Kd_omega * derivative_error_omega;
-    auto turning_rate = omega_control;
-
-    if(acc < 0) {
-      acc = 0;
-    }
-    if(acc > 2.5) {
+    double acc = 0;
+    double brake = 0;
+    if(u > 2.5) {
       acc = 2.5;
     }
+    if(u < 0.8) {
+      acc = 0.8;
+    }
+    acc = 4 - v(0); // overwrite (previous logic doesn't work)
+
+    // Lateral control
+    auto omega_d = -angular_vel;    
+    e = omega_d - omega(2);
+    integral_error_omega = integral_error_omega + e * hz;
+    derivative_error_omega = (e - previous_error_omega) / hz;
+    u = Kp_omega * e + Ki_omega * integral_error_omega + Kd_omega * derivative_error_omega;
+    previous_error_omega = e;
+    auto turning_rate = u;
+    turning_rate = -angular_vel; //overwrite (previous logic doesn't work)
+
+    if (turning_rate < -3){
+      turning_rate = -3;}
+    if (turning_rate > 3){
+      turning_rate = 3;}
 
     msg.angular_velocities[0] = acc;
     msg.angular_velocities[1] = turning_rate;
-    msg.angular_velocities[2] = 0;  // Breaking
+    msg.angular_velocities[2] = 0;
     msg.angular_velocities[3] = 0;
 
     car_commands.publish(msg);

@@ -35,7 +35,7 @@ def twist_callback(twist_msg_stamped):
     odom_msg.twist.twist.linear.y = 0 #v[1]
     odom_msg.twist.twist.linear.z = 0 #v[2]
 
-    # Still not working together with controller_node.cpp (line 100)
+    # Still not working together with controller_node.cpp (line 128)
     # omega_control  = (-angular_vel) - omega[2];
     # Therefore, setting it to zero until it works out
     odom_msg.twist.twist.angular.x = 0 #omega[0]
