@@ -17,13 +17,14 @@ TrajectoryPlannerROS:
   holonomic_robot: false  # Set to true if the robot has holonomic capabilities
   global_frame_id: world  # The frame ID used as the global reference frame
   
-  pdist_scale: 5.0         # The weighting for how much the controller should stay close to the path it was given, maximal possible value is 5.0 
-  gdist_scale: 0.0         # The weighting for how much the controller should attempt to reach its local goal, also controls speed, maximal possible value is 5.0 
+  path_distance_bias: 5.0         # The weighting for how much the controller should stay close to the path it was given, maximal possible value is 5.0 
+  goal_distance_bias: 0.0         # The weighting for how much the controller should attempt to reach its local goal, also controls speed, maximal possible value is 5.0 
   heading_lookahead: 3.5   # How far to look ahead in meters when scoring different in-place-rotation trajectories 
   heading_scoring: false
   
   dwa: false
   prune_plan: false
+  meter_scoring: true
  
 
 

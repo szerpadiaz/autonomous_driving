@@ -61,9 +61,9 @@ class controllerNode{
   double integral_error_omega = 0.0;
 
   // velocity control
-  double Kp_v = 1.0; //3;
+  double Kp_v = 5.0; //3;
   double Ki_v = 0.3; //36;
-  double Kd_v = 0.01; 
+  double Kd_v = 0.00; 
 
   // omega control
   double Kp_omega = 1.0;
