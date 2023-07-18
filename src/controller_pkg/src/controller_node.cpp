@@ -108,8 +108,8 @@ public:
     // Longitudinal control
     auto vd = -linear_vel;
     auto e = vd - v(0);
-    integral_error_v = integral_error_v + e * hz;
-    derivative_error_v = (e - previous_error_v) / hz;
+    integral_error_v = integral_error_v + e * (1/hz);
+    derivative_error_v = (e - previous_error_v) / (1/hz);
     auto u = Kp_v * e + Ki_v * integral_error_v + Kd_v * derivative_error_v;
     previous_error_v = e;
 
@@ -126,8 +126,8 @@ public:
     // Lateral control
     auto omega_d = -angular_vel;    
     e = omega_d - omega(2);
-    integral_error_omega = integral_error_omega + e * hz;
-    derivative_error_omega = (e - previous_error_omega) / hz;
+    integral_error_omega = integral_error_omega + e * (1/hz);
+    derivative_error_omega = (e - previous_error_omega) / (1/hz);
     u = Kp_omega * e + Ki_omega * integral_error_omega + Kd_omega * derivative_error_omega;
     previous_error_omega = e;
     auto turning_rate = u;
