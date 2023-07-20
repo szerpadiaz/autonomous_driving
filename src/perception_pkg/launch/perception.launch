@@ -64,7 +64,7 @@
     <param name="latch" value="false" />
 </node>
 
-<!-- Post processing the 2D map-->
-<node pkg="perception_pkg" type="global_mapping_2Dmap_node" name="global_mapping_2Dmap_node" output="screen"> </node>
+<!-- Post processing the 2D map
+<node pkg="perception_pkg" type="global_mapping_2Dmap_node" name="global_mapping_2Dmap_node" output="screen"> </node> -->
 
 </launch>

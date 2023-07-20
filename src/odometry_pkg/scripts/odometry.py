@@ -28,13 +28,19 @@ def twist_callback(twist_msg_stamped):
     omega = np.dot(R.transpose(), omega)  # Rotate omega
     v = np.dot(R.transpose(), v)          # Rotate v
 
-    odom_msg.twist.twist.linear.x = v[0]
-    odom_msg.twist.twist.linear.y = v[1]
-    odom_msg.twist.twist.linear.z = v[2]
+    # Still not working together with controller_node.cpp (line 110)
+    # velocity_control = -linear_vel - v(0);
+    # Therefore, setting it to zero until it works out
+    odom_msg.twist.twist.linear.x = 5 #v[0]
+    odom_msg.twist.twist.linear.y = 0 #v[1]
+    odom_msg.twist.twist.linear.z = 0 #v[2]
 
-    odom_msg.twist.twist.angular.x = omega[0]
-    odom_msg.twist.twist.angular.y = omega[1]
-    odom_msg.twist.twist.angular.z = omega[2]
+    # Still not working together with controller_node.cpp (line 128)
+    # omega_control  = (-angular_vel) - omega[2];
+    # Therefore, setting it to zero until it works out
+    odom_msg.twist.twist.angular.x = 0 #omega[0]
+    odom_msg.twist.twist.angular.y = 0 #omega[1]
+    odom_msg.twist.twist.angular.z = 0 #omega[2]
 
 
 if __name__ == '__main__':
