@@ -383,7 +383,7 @@ Visualization Manager:
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
-      Size (Pixels): 10
+      Size (Pixels): 5
       Size (m): 0.009999999776482582
       Style: Points
       Topic: /point_cloud_position_of_cars
@@ -419,7 +419,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 194.29306030273438
+      Distance: 350.5848388671875
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1

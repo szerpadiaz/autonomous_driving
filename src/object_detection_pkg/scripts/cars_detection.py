@@ -71,6 +71,7 @@ def K_callback(camera_msg):
 
 
 def convert_contours_to_points(contours, depth_image):
+    global K
     points = []
     # Iterate over the contours and convert each point to 3D
     for contour in contours:
@@ -84,13 +85,14 @@ def convert_contours_to_points(contours, depth_image):
             K_inv = np.linalg.inv(K)
             uv = np.array([u * depth, v * depth, depth])
             xyz = K_inv @ uv
-            x_3d = xyz[0] / 1000  # convert mm to meter
-            y_3d = xyz[2] / 1000  # convert mm to meter
-            z_3d = xyz[1] / 1000  # convert mm to meter
+            #  Convert from camera frame to body frame and convert from mm to meter
+            x_3d = xyz[2] / 1000
+            y_3d = -xyz[0] / 1000
+            z_3d = xyz[1] / 1000
 
             if (x_3d != 0.0 or y_3d != 0.0 or z_3d != 0.0):
                 max_range = 25
-                if (y_3d < max_range):
+                if (x_3d < max_range):
                     points.append([x_3d, y_3d, z_3d])
     return points
 
