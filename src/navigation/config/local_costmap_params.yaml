@@ -30,7 +30,6 @@ local_costmap:
 
     obstacle_layer:
         enabled: false
-     #   observation_sources: laser_scan_sensor
-      #  footprint_clearing_enabled: true
-       # laser_scan_sensor: {data_type: LaserScan, sensor_frame: base_link, clearing: true, marking: true, topic: /LaserScan}
-          
+        observation_sources: point_cloud_sensor
+        footprint_clearing_enabled: true
+        point_cloud_sensor: {sensor_frame: body, data_type: PointCloud2, topic: point_cloud_position_of_cars, marking: true, clearing: true}
