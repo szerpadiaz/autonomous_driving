@@ -52,13 +52,6 @@ if __name__ == '__main__':
     # Create an Odometry message object
     odom_msg = Odometry()
 
-<<<<<<< HEAD
-    # Set the frame ID
-    odom_msg.header.frame_id = 'true_body'
-
-    # Set the child frame ID
-    odom_msg.child_frame_id = 'world'
-=======
     # The position, orientation and velocity are given in the world frame
     odom_msg.header.frame_id = 'world'
 
@@ -67,7 +60,6 @@ if __name__ == '__main__':
 
     # The odometry message says: the 'body' frame has the pose in the 'world' frame
     # and the velocity in the body frame
->>>>>>> ff67ebf761d7e033997a415bea1db249b85d1e78
 
     # Create subscribers for the PoseStamped and TwistStamped topics
     rospy.Subscriber('/true_pose', PoseStamped, pose_callback)

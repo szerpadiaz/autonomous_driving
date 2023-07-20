@@ -10,19 +10,6 @@ TrajectoryPlannerROS:
   acc_lim_x: 1.0      # Maximum forward acceleration
   acc_lim_y: 0.0      # Maximum lateral acceleration (no lateral movement)
 
-<<<<<<< HEAD
-  xy_goal_tolerance: 2.0    # Tolerance for goal proximity in x and y axes
-  z_goal_tolerance: 2.0     # Tolerance for goal proximity in the z axis (elevation)
-  yaw_goal_tolerance: 0.2  # Tolerance for goal proximity in yaw angle (2*pi to indirectly disable the check)
-
-  holonomic_robot: false  # Set to true if the robot has holonomic capabilities
-  global_frame_id: world  # The frame ID used as the global reference frame
-  sim_time: 3             # The time for which the local planner simulates ahead
-  sim_granularity: 0.025    # The step size, in meters, to take between points on a given trajectory 
-
-  meter_scoring: true
-  path_distance_bias: 64
-=======
   xy_goal_tolerance: 4.5    # Tolerance for goal proximity in x and y axes
   z_goal_tolerance: 3.0     # Tolerance for goal proximity in the z axis (elevation)
   yaw_goal_tolerance: 6.28  # Tolerance for goal proximity in yaw angle (2*pi to indirectly disable the check)
@@ -41,4 +28,3 @@ TrajectoryPlannerROS:
  
 
 
->>>>>>> ff67ebf761d7e033997a415bea1db249b85d1e78
