@@ -41,6 +41,10 @@ catkin_package(CATKIN_DEPENDS
   sensor_msgs
 )
 
+catkin_install_python(PROGRAMS scripts/odometry.py 
+DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 include_directories(${PCL_INCLUDE_DIRS})
 include_directories(${catkin_INCLUDE_DIRS} ${OCTOMAP_INCLUDE_DIRS})
 add_definitions(${PCL_DEFINITIONS})

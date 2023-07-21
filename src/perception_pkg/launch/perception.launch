@@ -1,6 +1,7 @@
 <launch>
 
 <!-- Localization -->
+  <node name="odometry" pkg="perception_pkg" type="odometry.py" output="screen"/>
 
 <!-- Perception: point cloud generation using depth_image_proc-->
   <node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager" />
