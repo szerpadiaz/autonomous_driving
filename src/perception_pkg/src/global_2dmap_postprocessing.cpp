@@ -4,15 +4,15 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 
-class global_mapping_2Dmap_node{
+class global_2dmap_postprocessing{
     ros::NodeHandle nh;
     ros::Subscriber projected_map_sub;
     ros::Publisher projected_map_pub;
 
 
 public:
-    global_mapping_2Dmap_node() {
-        projected_map_sub = nh.subscribe("projected_map", 1, &global_mapping_2Dmap_node::projected_map_sub_cb, this);
+    global_2dmap_postprocessing() {
+        projected_map_sub = nh.subscribe("projected_map", 1, &global_2dmap_postprocessing::projected_map_sub_cb, this);
         projected_map_pub = nh.advertise<nav_msgs::OccupancyGrid>("projected_map_2", 1);
     }
 
@@ -38,8 +38,8 @@ public:
 };
 
 int main(int argc, char** argv){
-    ros::init(argc, argv, "global_mapping_2Dmap_node");
+    ros::init(argc, argv, "global_2dmap_postprocessing");
     ROS_INFO_NAMED("global mapping (post processing 2d map)", "started!");
-    global_mapping_2Dmap_node n;
+    global_2dmap_postprocessing n;
     ros::spin();
 }

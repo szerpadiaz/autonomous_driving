@@ -14,7 +14,7 @@
   </node>
 
 <!-- Node that filters the point-cloud -->
-<node pkg="perception_pkg" type="global_mapping_node" name="global_mapping_node" output="screen"> </node>
+<node pkg="perception_pkg" type="point_cloud_filtering" name="point_cloud_filtering" output="screen"> </node>
 
 <!-- Octomap Server -->
 <node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
@@ -65,6 +65,6 @@
 </node>
 
 <!-- Post processing the 2D map
-<node pkg="perception_pkg" type="global_mapping_2Dmap_node" name="global_mapping_2Dmap_node" output="screen"> </node> -->
+<node pkg="perception_pkg" type="global_2dmap_postprocessing" name="global_2dmap_postprocessing" output="screen"> </node> -->
 
 </launch>

@@ -12,14 +12,14 @@
 #include <pcl/kdtree/kdtree_flann.h>
 #include <unordered_set>
 
-class global_mapping_node{
+class point_cloud_filtering{
     ros::NodeHandle nh;
     ros::Subscriber point_cloud_sub;
     ros::Publisher transformed_point_cloud_pub;
 
 public:
-    global_mapping_node() {
-        point_cloud_sub = nh.subscribe("points_cloud", 10, &global_mapping_node::transform_point_cloud_cb, this);
+    point_cloud_filtering() {
+        point_cloud_sub = nh.subscribe("points_cloud", 10, &point_cloud_filtering::transform_point_cloud_cb, this);
         transformed_point_cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("transformed_cloud", 10);
     }
 
@@ -71,8 +71,8 @@ public:
 };
 
 int main(int argc, char** argv){
-    ros::init(argc, argv, "global_mapping_node");
+    ros::init(argc, argv, "point_cloud_filtering");
     ROS_INFO_NAMED("global mapping", "started!");
-    global_mapping_node n;
+    point_cloud_filtering n;
     ros::spin();
 }
