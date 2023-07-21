@@ -3,7 +3,7 @@
 <!-- MoveBaseSeq node launch and Points Sequence ROS Parameters Loading -->
 
     <!--Run move_base_seqs node-->
-        <node pkg="simple_navigation_goals" type="move_base_seq" name="move_base_seq" output="screen" respawn="false">
+        <node pkg="simple_navigation_goals" type="move_base_seq" name="move_base_seq" output="screen" respawn="false" launch-prefix="bash -c 'sleep 5; $0 $@'">
         
         <!-- Load Sequence of Points (Cartesian Coordinates wrt "map" RF, in meters) -->
             <rosparam param="p_seq">[
