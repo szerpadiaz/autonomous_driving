@@ -12,7 +12,7 @@ import math
 from geometry_msgs.msg import Point
 
 
-
+K = []
 contours = []
 new_width = 1280  # Adjust the width as desired
 new_height = 720  # Adjust the height as desired
@@ -46,22 +46,23 @@ def segmentation_callback(segmentation_msg):
 
 def depth_callback(depth_msg):
     global contours
-    # Create a publisher to publish the received messages
-    bridge = CvBridge()
-    try:
-        depth_image = bridge.imgmsg_to_cv2(depth_msg, desired_encoding="passthrough")
-        if len(contours) != 0:
-            points = convert_contours_to_points(contours, depth_image)
-            header = std_msgs.msg.Header()
-            header.stamp = rospy.Time.now()
-            header.frame_id = 'body'
-            point_cloud_msg = pcl2.create_cloud_xyz32(header, points)
-            point_cloud_publisher.publish(point_cloud_msg)
+    if len(K) != 0:
+        # Create a publisher to publish the received messages
+        bridge = CvBridge()
+        try:
+            depth_image = bridge.imgmsg_to_cv2(depth_msg, desired_encoding="passthrough")
+            if len(contours) != 0:
+                points = convert_contours_to_points(contours, depth_image)
+                header = std_msgs.msg.Header()
+                header.stamp = rospy.Time.now()
+                header.frame_id = 'body'
+                point_cloud_msg = pcl2.create_cloud_xyz32(header, points)
+                point_cloud_publisher.publish(point_cloud_msg)
 
 
-    except CvBridgeError as e:
-        rospy.logerr("CvBridge Error: {0}".format(e))
-        return
+        except CvBridgeError as e:
+            rospy.logerr("CvBridge Error: {0}".format(e))
+            return
 
 
 def K_callback(camera_msg):
@@ -104,12 +105,14 @@ rospy.init_node("cars_detection")
 point_cloud_publisher = rospy.Publisher("point_cloud_position_of_cars", PointCloud2, queue_size=5)
 
 # Subscribe to the segmentation, depth, and camera info topics
+K_topic = "/unity_ros/OurCar/Sensors/DepthCamera/camera_info"
 segmentation_topic = "/unity_ros/OurCar/Sensors/SemanticCamera/image_raw"
 depth_topic = "/unity_ros/OurCar/Sensors/DepthCamera/image_raw"
-K_topic = "/unity_ros/OurCar/Sensors/DepthCamera/camera_info"
+
+rospy.Subscriber(K_topic, CameraInfo, K_callback)
 rospy.Subscriber(segmentation_topic, Image, segmentation_callback)
 rospy.Subscriber(depth_topic, Image, depth_callback)
-rospy.Subscriber(K_topic, CameraInfo, K_callback)
+
 
 # Spin ROS
 rospy.spin()
