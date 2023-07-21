@@ -12,12 +12,9 @@
   <node pkg="object_detection_pkg" type="traffic_light_depth_position.py" name="traffic_light_depth_position" output="screen"> </node>
 
   <!-- Navigation -->
-  <include file="$(find navigation)/launch/move_base.launch"/>  
+  <include file="$(find navigation_pkg)/launch/navigation.launch"/>  
 
-   <!-- Navigation Goals-->
-  <include file="$(find simple_navigation_goals)/launch/movebase_seq.launch"/>
-
-   <!-- Controller -->
+  <!-- Controller -->
   <include file="$(find controller_pkg)/launch/controller_pkg.launch"/>
 
   <!-- RVIZ -->
