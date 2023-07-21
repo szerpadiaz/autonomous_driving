@@ -5,7 +5,6 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /PointCloud21
       Splitter Ratio: 0.4686567187309265
     Tree Height: 504
   - Class: rviz/Selection
@@ -25,7 +24,7 @@ Panels:
   - Class: rviz/Time
     Name: Time
     SyncMode: 0
-    SyncSource: PointCloud2
+    SyncSource: car_detections
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -120,11 +119,11 @@ Visualization Manager:
         Local cost map: true
         Local plan: true
         Path: true
-        PointCloud2: true
         TF: true
         Transformed env point cloud: true
         Value: true
         World frame: true
+        car_detections: true
       Zoom Factor: 1
     - Alpha: 1
       Autocompute Intensity Bounds: true
@@ -182,6 +181,34 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: false
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 0.7016489505767822
+        Min Value: -0.6234458088874817
+        Value: true
+      Axis: Z
+      Channel Name: x
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: true
+      Max Color: 204; 0; 0
+      Min Color: 0; 0; 0
+      Name: car_detections
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 5
+      Size (m): 0.009999999776482582
+      Style: Points
+      Topic: /point_cloud_position_of_cars
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
     - Class: octomap_rviz_plugin/OccupancyGrid
       Enabled: false
       Max. Height Display: 3.4028234663852886e+38
@@ -363,34 +390,6 @@ Visualization Manager:
       Topic: /current_state_est
       Unreliable: false
       Value: false
-    - Alpha: 1
-      Autocompute Intensity Bounds: true
-      Autocompute Value Bounds:
-        Max Value: 0.7016489505767822
-        Min Value: -0.6234458088874817
-        Value: true
-      Axis: Z
-      Channel Name: x
-      Class: rviz/PointCloud2
-      Color: 255; 255; 255
-      Color Transformer: Intensity
-      Decay Time: 0
-      Enabled: true
-      Invert Rainbow: true
-      Max Color: 204; 0; 0
-      Min Color: 0; 0; 0
-      Name: PointCloud2
-      Position Transformer: XYZ
-      Queue Size: 10
-      Selectable: true
-      Size (Pixels): 5
-      Size (m): 0.009999999776482582
-      Style: Points
-      Topic: /point_cloud_position_of_cars
-      Unreliable: false
-      Use Fixed Frame: true
-      Use rainbow: true
-      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
