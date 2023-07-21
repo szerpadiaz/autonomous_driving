@@ -36,17 +36,22 @@ echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
 Before proceeding, install the following ROS packages:
 
 ```bash
+sudo apt-get install ros-noetic-nodelet
 sudo apt-get install ros-noetic-depth-image-proc
 sudo apt-get install ros-noetic-octomap
 sudo apt-get install ros-noetic-octovis
 sudo apt-get install ros-noetic-octomap-msgs
 sudo apt-get install ros-noetic-octomap-rviz-*
 sudo apt-get install ros-noetic-octomap-mapping
+sudo apt-get install ros-noetic-octomap-server
 
 sudo apt-get install ros-noetic-pcl-ros
 sudo apt-get install ros-noetic-pcl-conversions
 sudo apt-get install python3-pcl
 sudo apt-get install python-opencv
+
+sudo apt install ros-noetic-navigation
+sudo apt install ros-noetic-actionlib
 ```
 
 ## Getting Started
