@@ -10,6 +10,7 @@ project(object_detection_pkg)
 find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -51,7 +52,10 @@ find_package(catkin REQUIRED COMPONENTS
 #   Message1.msg
 #   Message2.msg
 # )
-
+add_message_files(
+  FILES
+  DepthAndColor.msg
+)
 ## Generate services in the 'srv' folder
 # add_service_files(
 #   FILES
@@ -71,6 +75,10 @@ find_package(catkin REQUIRED COMPONENTS
 #   DEPENDENCIES
 #   std_msgs
 # )
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -107,7 +115,7 @@ catkin_package(
 #  CATKIN_DEPENDS rospy std_msgs
 #  DEPENDS system_lib
 )
-catkin_install_python(PROGRAMS scripts/cars_detection.py scripts/traffic_light_color.py scripts/traffic_light_depth_position.py
+catkin_install_python(PROGRAMS scripts/cars_detection.py scripts/traffic_light_status.py
 DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 ###########

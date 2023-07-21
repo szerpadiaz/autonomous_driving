@@ -3,26 +3,24 @@
 import rospy
 from std_msgs.msg import String, Float32
 from geometry_msgs.msg import Twist, PoseStamped
-
+from object_detection_pkg.msg import DepthAndColor
+from std_msgs.msg import Bool
 
 class TrafficLightBrakingNode:
     def __init__(self):
         rospy.init_node('traffic_light_braking_node', anonymous=True)
-        rospy.Subscriber('/traffic_light_color', String, self.traffic_light_color_callback)
-        rospy.Subscriber('/traffic_light_position', Float32, self.traffic_light_position_callback)
+        rospy.Subscriber('/traffic_light_status', DepthAndColor, self.traffic_light_status_callback)
         rospy.Subscriber('/true_pose', PoseStamped, self.car_position_callback)
         self.brake_active = False
         self.current_light_color = ''
         self.current_light_position = 0.0
         self.current_position_car_x = 0.0
         self.current_position_car_y= 0.0
-        self.cmd_vel_pub = rospy.Publisher('/cmd_vel2', Twist, queue_size=10)
+        self.brake_bool = rospy.Publisher('/brake_bool', Bool, queue_size=10)
 
-    def traffic_light_color_callback(self, msg):
-        self.current_light_color = msg.data
-
-    def traffic_light_position_callback(self, msg):
-        self.current_light_position = msg.data
+    def traffic_light_status_callback(self, msg):
+        self.current_light_color = msg.dominant_color
+        self.current_light_position = msg.depth
 
         # Check the position and determine if braking is necessary'
         if self.current_light_color == "Red" and self.current_light_position <= 23000.0:
@@ -70,12 +68,12 @@ class TrafficLightBrakingNode:
         rospy.loginfo("Applying brakes...")
 
         # Brake command: velocity set to 0
-        brake_cmd = Twist()
-        brake_cmd.linear.x = 0.0
-        brake_cmd.angular.z = 0.0
+        bool_msg = Bool()
+        bool_msg.data = True
 
         # Publish the brake command
-        self.cmd_vel_pub.publish(brake_cmd)
+        self.brake_bool.publish(bool_msg)
+
 
     def continue_driving(self):
         rospy.loginfo("Continuing driving...")
@@ -89,6 +87,3 @@ if __name__ == '__main__':
         node.run()
     except rospy.ROSInterruptException:
        pass
-
-    
-   

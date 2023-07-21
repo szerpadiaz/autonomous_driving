@@ -1,3 +1,4 @@
+
 #include <ros/ros.h>
 
 #include <ros/console.h>
@@ -12,6 +13,7 @@
 #include <std_msgs/Float64.h>
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Path.h>
+#include <std_msgs/Bool.h>
 
 #define PI M_PI
 
@@ -30,6 +32,7 @@ class controllerNode{
   ros::Subscriber current_state;
   ros::Publisher car_commands;
   ros::Subscriber cmd_vel;
+  ros::Subscriber cmd_vel_brake;
   ros::Subscriber local_path;
 
   ros::Timer timer;
@@ -52,6 +55,7 @@ class controllerNode{
 
   float linear_vel;
   float angular_vel;
+  bool brake_bool;
 
   double integral_error_v = 0.0;
   double derivative_error_v = 0.0; 
@@ -69,20 +73,27 @@ class controllerNode{
   double Kp_omega = 1.0;
   double Ki_omega = 0.0;
   double Kd_omega = 0.1;
-
 public:
   controllerNode():hz(50.0){
       
       current_state = nh.subscribe("current_state_est", 1, &controllerNode::onCurrentState, this);
       cmd_vel = nh.subscribe("cmd_vel", 1, &controllerNode::onCmdVelocity, this);
+      cmd_vel_brake = nh.subscribe("brake_bool", 1, &controllerNode::onCmdVelocity_brake, this);  //Set acc and turning_rate 0 if it detects red traffic lights
       car_commands = nh.advertise<mav_msgs::Actuators>("car_commands", 1);
       timer = nh.createTimer(ros::Rate(hz), &controllerNode::controlLoop, this);
+      brake_bool = false;
   }
 
   void onCmdVelocity(const geometry_msgs::Twist& msg){
+
     linear_vel = msg.linear.x;
     angular_vel = msg.angular.z;
   }
+
+  void onCmdVelocity_brake(const std_msgs::Bool::ConstPtr& msg){
+    brake_bool = msg->data;
+  }
+
 
   void onCurrentState(const nav_msgs::Odometry& cur_state){
       
@@ -138,10 +149,21 @@ public:
     if (turning_rate > 3){
       turning_rate = 3;}
 
-    msg.angular_velocities[0] = acc;
-    msg.angular_velocities[1] = turning_rate;
-    msg.angular_velocities[2] = 0;
-    msg.angular_velocities[3] = 0;
+
+    if (brake_bool == true)
+    {
+      msg.angular_velocities[0] = 0;
+      msg.angular_velocities[1] = 0;
+      msg.angular_velocities[2] = 0;
+      msg.angular_velocities[3] = 0;
+    }
+    else 
+    {
+      msg.angular_velocities[0] = acc;
+      msg.angular_velocities[1] = turning_rate;
+      msg.angular_velocities[2] = 0;
+      msg.angular_velocities[3] = 0;
+    }
 
     car_commands.publish(msg);
   }
