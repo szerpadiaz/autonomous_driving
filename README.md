@@ -1,5 +1,7 @@
 # Autonomous Driving Project (AD17)
 
+For a video showing the functionality of the system see [here](https://drive.google.com/file/d/1o6MuE4VexhvKRUSERUOxlwFWfC5o4oDj/view?usp=sharing)
+
 ## System Requirements
 - Ubuntu 20.04.6 LTS (64-bit)
 
